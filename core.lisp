@@ -1,4 +1,4 @@
-(defpackage #:tf
+(defpackage #:tf/core
   (:use #:cl)
   (:export #:make-word
            #:word-name
@@ -11,7 +11,7 @@
            #:parse
            #:evaluate-atom
            #:evaluate))
-(in-package #:tf)
+(in-package #:tf/core)
 
 (defun parse (stream)
   (let (code buf atomp)
