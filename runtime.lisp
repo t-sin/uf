@@ -15,7 +15,15 @@
              (push (make-word :name ',(intern (symbol-name name) :uf/dict) :code (function ,name*)) *dictionary*))))))
 
 ;;; defining words...
+
+;; I/O
 (defword (|.|) (print (pop (vm-stack vm))))
+
+;; arithmetic operation
+(defword (|+|) (push (+ (pop (vm-stack vm)) (pop (vm-stack vm))) (vm-stack vm)))
+(defword (|-|) (push (- (pop (vm-stack vm)) (pop (vm-stack vm))) (vm-stack vm)))
+(defword (|*|) (push (* (pop (vm-stack vm)) (pop (vm-stack vm))) (vm-stack vm)))
+(defword (|/|) (push (/ (pop (vm-stack vm)) (pop (vm-stack vm))) (vm-stack vm)))
 
 (defun init-vm ()
   (let ((vm (make-vm)))
