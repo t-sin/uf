@@ -13,6 +13,8 @@
            #:evaluate))
 (in-package #:uf/core)
 
+(defpackage #:uf/dict)
+
 (defun parse (stream)
   (let (code buf atomp)
     (flet ((read-atom (ch)
@@ -23,7 +25,7 @@
            (terminate-atom ()
              (when atomp
                (setf atomp nil)
-               (push (intern (concatenate 'string (nreverse buf))) code))))
+               (push (intern (concatenate 'string (nreverse buf)) :uf/dict) code))))
       (loop
         :for ch := (read-char stream nil :eof)
         :until (eq ch :eof)
