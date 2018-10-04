@@ -16,16 +16,23 @@
 (defpackage #:uf/dict)
 
 (defun parse (stream)
-  (let (code buf atomp)
+  (let (code buf atomp numberp)
     (flet ((read-atom (ch)
              (unless atomp
                (setf atomp t)
+               (when (digit-char-p ch)
+                 (setf numberp t))
                (setf buf nil))
+             (unless (digit-char-p ch)
+               (setf numberp nil))
              (push ch buf))
            (terminate-atom ()
              (when atomp
                (setf atomp nil)
-               (push (intern (concatenate 'string (nreverse buf)) :uf/dict) code))))
+               (let ((s (concatenate 'string (nreverse buf))))
+                 (if numberp
+                     (push (parse-integer s) code)
+                     (push (intern s :uf/dict) code))))))
       (loop
         :for ch := (read-char stream nil :eof)
         :until (eq ch :eof)
