@@ -38,6 +38,12 @@
 (defstruct word name code)
 (defstruct vm dict stack)
 
+(defmethod print-object ((word word) stream)
+  (format stream "~a" (word-name word)))
+
+(defmethod print-object ((vm vm) stream)
+  (format stream "#<VM: ~s>" (vm-stack vm)))
+
 (defun evaluate-atom (atom vm)
   (let ((word (find atom (vm-dict vm) :key #'word-name)))
     (if word
