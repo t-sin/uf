@@ -1,10 +1,10 @@
-(defpackage #:tf
+(defpackage #:uf
   (:use #:cl)
-  (:import-from #:tf/core
+  (:import-from #:uf/core
                 #:parse
                 #:evaluate)
-  (:import-from #:tf/runtime
+  (:import-from #:uf/runtime
                 #:init-vm)
 (:export #:parse
          #:evaluate))
-(in-package #:tf)
+(in-package #:uf)

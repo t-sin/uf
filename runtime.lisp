@@ -1,6 +1,6 @@
-(defpackage #:tf/runtime
-  (:use #:cl #:tf/core))
-(in-package #:tf/runtime)
+(defpackage #:uf/runtime
+  (:use #:cl #:uf/core))
+(in-package #:uf/runtime)
 
 (defparameter *dictionary* nil)
 

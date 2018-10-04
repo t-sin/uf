@@ -1,7 +1,7 @@
-(defsystem :tf
+(defsystem :uf
   :class :package-inferred-system
-  :description "tf"
+  :description "uf"
   :version "0.1"
   :author "TANAKA Shinichi"
   :license "no license"
-  :depends-on ("tf/main"))
+  :depends-on ("uf/main"))
