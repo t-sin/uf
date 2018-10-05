@@ -1,5 +1,6 @@
 (defpackage #:uf/runtime
-  (:use #:cl #:uf/core))
+  (:use #:cl #:uf/core)
+  (:export #:init-vm))
 (in-package #:uf/runtime)
 
 (defparameter *dictionary* nil)
