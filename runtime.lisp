@@ -17,9 +17,12 @@
 ;;; defining words...
 
 ;; I/O
-(defword (|.|) (format t "~a" (pop (vm-stack vm))))
-(defword (|cr|) (terpri))
-(defword (|emit|) (format t "~a" (code-char (pop (vm-stack vm)))))
+(defword (|.|)
+  (format t "~a" (pop (vm-stack vm))))
+(defword (|cr|)
+  (terpri))
+(defword (|emit|)
+  (format t "~a" (code-char (pop (vm-stack vm)))))
 
 ;; arithmetic operation
 (defword (|+|) (push (+ (pop (vm-stack vm)) (pop (vm-stack vm))) (vm-stack vm)))
