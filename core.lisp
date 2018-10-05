@@ -9,8 +9,8 @@
            #:vm-stack
 
            #:parse
-           #:evaluate-atom
-           #:evaluate))
+           #:execute
+           #:execute*))
 (in-package #:uf/core)
 
 (defpackage #:uf/dict)
@@ -53,13 +53,13 @@
 (defmethod print-object ((vm vm) stream)
   (format stream "#<VM: ~s>" (vm-stack vm)))
 
-(defun evaluate-atom (atom vm)
+(defun execute (atom vm)
   (let ((word (find atom (vm-dict vm) :key #'word-name)))
     (if word
         (funcall (word-code word) vm)
         (push atom (vm-stack vm)))))
 
-(defun evaluate (code vm)
+(defun execute* (code vm)
   (loop
     :for atom :in code
-    :do (evaluate-atom atom vm)))
+    :do (execute atom vm)))
