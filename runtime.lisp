@@ -8,7 +8,7 @@
   (let ((name* (intern (format nil "word:~a" (symbol-name name)) :uf/dict))
         ($word (gensym "uf")))
     `(progn
-       (defun ,name* (vm) ,@body)
+       (defun ,name* (vm) (declare (ignorable vm)) ,@body)
        (let ((,$word (find ',name* *dictionary* :key #'word-name)))
          (if ,$word
              (error "word ~s is already registered" (word-name ,$word))
