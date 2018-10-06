@@ -1,21 +1,19 @@
 (defpackage #:uf/runtime
-  (:use #:cl #:uf/core)
-  (:export #:init-vm))
+  (:use #:cl #:uf/core))
 (in-package #:uf/runtime)
 
-(defparameter *dictionary* nil)
-
 (defmacro defword ((name) &body body)
-  (let ((name* (intern (format nil "word:~a" (symbol-name name)) :uf/dict))
+  (let (($fn-name (intern (format nil "word:~a" (symbol-name name)) :uf/dict))
         ($word (gensym "uf")))
     `(progn
-       (defun ,name* (vm) (declare (ignorable vm)) ,@body)
-       (let ((,$word (find ',name* *dictionary* :key #'word-name)))
+       (defun ,$fn-name (vm)
+         (declare (ignorable vm))
+         ,@body)
+       (let ((,$word (find ',$fn-name uf/core:*dictionary* :key #'word-name)))
          (if ,$word
              (error "word ~s is already registered" (word-name ,$word))
-             (push (make-word :name ',(intern (symbol-name name) :uf/dict) :code (function ,name*)) *dictionary*))))))
-
-;;; defining words...
+             (push (make-word :name ',(intern (symbol-name name) :uf/dict)
+                              :code (function ,$fn-name)) uf/core:*dictionary*))))))
 
 ;; I/O
 (defword (|.|)
