@@ -8,9 +8,11 @@
            #:vm-dict
            #:vm-stack
 
+           #:*dictionary*
+           #:defword
            #:parse
            #:execute
-           #:execute*))
+           #:init-vm))
 (in-package #:uf/core)
 
 (defpackage #:uf/dict)
@@ -45,7 +47,8 @@
                    (return (nreverse code)))))))
 
 (defstruct word name code)
-(defstruct vm dict stack)
+(defstruct vm code ip dict stack rstack)
+(defparameter *dictionary* nil)
 
 (defmethod print-object ((word word) stream)
   (format stream "~a" (word-name word)))
@@ -53,13 +56,43 @@
 (defmethod print-object ((vm vm) stream)
   (format stream "#<VM: ~s>" (vm-stack vm)))
 
-(defun execute (atom vm)
-  (let ((word (find atom (vm-dict vm) :key #'word-name)))
-    (if word
-        (funcall (word-code word) vm)
-        (push atom (vm-stack vm)))))
+(defun get-atom (vm)
+  (prog1
+      (nth (vm-ip vm) (vm-code vm))
+    (incf (vm-ip vm))))
 
-(defun execute* (code vm)
+(defun define-word (vm)
+  (let* ((name (get-atom vm))
+         (code (loop
+                 :named collect-code
+                 :for atom := (get-atom vm)
+                 :with %code := nil
+                 :until (eq atom 'uf/dict::|;|)
+                 :do (if (null atom)
+                         (return-from collect-code nil)
+                         (push atom %code))
+                 :finally (return-from collect-code (nreverse %code)))))
+    (if (or (null name) (null code))
+        (error "malformed word definition!")
+        (let* ((word-fn (lambda (vm) (format t "invoked ~s!!!!!!!!!~%" name)))
+               (word (make-word :name name :code word-fn)))
+          (format t "defword = (~s, (~{~a~^ ~}))~%" name code)
+          (push word *dictionary*)))))
+
+(defun execute (vm)
   (loop
-    :for atom :in code
-    :do (execute atom vm)))
+    :for atom := (get-atom vm)
+    :until (null atom)
+    :do (format t "dict: ~s~%" (vm-dict vm))
+    :do (format t "name: ~s ~%" atom)
+    :do (if (eq atom 'uf/dict::|:|)
+            (define-word vm)
+            (let ((word (find atom (vm-dict vm) :key #'word-name)))
+              (if word
+                  (funcall (word-code word) vm)
+                  (push atom (vm-stack vm)))))))
+
+(defun init-vm (code)
+  (let ((vm (make-vm :code code :ip 0)))
+    (setf (vm-dict vm) (copy-tree *dictionary*))
+    vm))

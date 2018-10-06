@@ -54,8 +54,3 @@
 (defword (|-|) (push (- (pop (vm-stack vm)) (pop (vm-stack vm))) (vm-stack vm)))
 (defword (|*|) (push (* (pop (vm-stack vm)) (pop (vm-stack vm))) (vm-stack vm)))
 (defword (|/|) (push (/ (pop (vm-stack vm)) (pop (vm-stack vm))) (vm-stack vm)))
-
-(defun init-vm ()
-  (let ((vm (make-vm)))
-    (setf (vm-dict vm) (copy-tree *dictionary*))
-    vm))

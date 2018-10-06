@@ -2,9 +2,10 @@
   (:use #:cl)
   (:import-from #:uf/core
                 #:parse
-                #:execute*)
-  (:import-from #:uf/runtime
+                #:execute
                 #:init-vm)
-(:export #:parse
-         #:execute*))
+  (:import-from #:uf/runtime)
+(:export #:init-vm
+         #:parse
+         #:execute))
 (in-package #:uf)
