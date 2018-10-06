@@ -5,6 +5,8 @@
 > 
 > --- Colleen, Ursa Major Find
 
+*uf* is a toy implementation of Forth programming language. It's goal is to understand Forth.
+
 ## Author
 
 - TANAKA Shinichi (<shinichi.tanaka45@gmail.com>)
