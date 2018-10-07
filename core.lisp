@@ -46,7 +46,7 @@
                    (terminate-atom)
                    (return (nreverse code)))))))
 
-(defstruct word name code)
+(defstruct word name code system-p)
 (defstruct vm code ip dict stack rstack)
 (defparameter *dictionary* nil)
 
@@ -63,6 +63,7 @@
 
 (defun define-word (vm)
   (let* ((name (get-atom vm))
+         (start-pos (vm-ip vm))
          (code (loop
                  :named collect-code
                  :for atom := (get-atom vm)
@@ -71,20 +72,26 @@
                  :do (if (null atom)
                          (return-from collect-code nil)
                          (push atom %code))
-                 :finally (return-from collect-code (nreverse %code)))))
+                 :finally (return-from collect-code (nreverse %code))))
+         (end-pos (vm-ip vm)))
     (if (or (null name) (null code))
         (error "malformed word definition!")
-        (let* ((word-fn (lambda (vm) (format t "invoked ~s!!!!!!!!!~%" name)))
+        (let* ((word-fn #'(lambda (vm)
+                            (let ((vm* (init-vm code)))
+                              (setf (vm-stack vm*) (vm-stack vm)
+                                    (vm-dict vm*) (vm-dict vm))
+                              (execute vm*)
+                              (setf (vm-stack vm) (vm-stack vm*)))))
                (word (make-word :name name :code word-fn)))
-          (format t "defword = (~s, (~{~a~^ ~}))~%" name code)
-          (push word *dictionary*)))))
+          (let ((w (find name (vm-dict vm) :key #'word-name)))
+            (if (and (not (null w)) (word-system-p w))
+                (error "cannot overwrite the predefined word: ~s" name)
+                (push word (vm-dict vm))))))))
 
 (defun execute (vm)
   (loop
     :for atom := (get-atom vm)
     :until (null atom)
-    :do (format t "dict: ~s~%" (vm-dict vm))
-    :do (format t "name: ~s ~%" atom)
     :do (if (eq atom 'uf/dict::|:|)
             (define-word vm)
             (let ((word (find atom (vm-dict vm) :key #'word-name)))
@@ -94,5 +101,5 @@
 
 (defun init-vm (code)
   (let ((vm (make-vm :code code :ip 0)))
-    (setf (vm-dict vm) (copy-tree *dictionary*))
+    (setf (vm-dict vm) *dictionary*)
     vm))

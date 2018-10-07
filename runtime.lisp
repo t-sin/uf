@@ -13,7 +13,7 @@
          (if ,$word
              (error "word ~s is already registered" (word-name ,$word))
              (push (make-word :name ',(intern (symbol-name name) :uf/dict)
-                              :code (function ,$fn-name)) uf/core:*dictionary*))))))
+                              :code (function ,$fn-name) :system-p t) uf/core:*dictionary*))))))
 
 ;; I/O
 (defword (|.|)
