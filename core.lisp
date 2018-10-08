@@ -92,12 +92,11 @@
   (loop
     :for atom := (get-atom vm)
     :until (null atom)
-    :do (if (eq atom 'uf/dict::|:|)
-            (define-word vm)
-            (let ((word (find atom (vm-dict vm) :key #'word-name)))
-              (if word
-                  (funcall (word-code word) vm)
-                  (push atom (vm-stack vm)))))))
+    :do (cond ((eq atom 'uf/dict::|:|) (define-word vm))
+              (t  (let ((word (find atom (vm-dict vm) :key #'word-name)))
+                    (if word
+                        (funcall (word-code word) vm)
+                        (push atom (vm-stack vm))))))))
 
 (defun init-vm (code)
   (let ((vm (make-vm :code code :ip 0)))
