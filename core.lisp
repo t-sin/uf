@@ -11,8 +11,7 @@
            #:*dictionary*
            #:defword
            #:parse
-           #:execute
-           #:init-vm))
+           #:execute))
 (in-package #:uf/core)
 
 (defpackage #:uf/dict)
@@ -95,8 +94,3 @@
                               (push (vm-ip vm) (vm-rstack vm))
                               (setf (vm-ip vm) (word-start word))))
                         (push atom (vm-stack vm))))))))
-
-(defun init-vm (code)
-  (let ((vm (make-vm :code code :ip 0)))
-    (setf (vm-dict vm) *dictionary*)
-    vm))
