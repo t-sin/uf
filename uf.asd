@@ -1,7 +1,7 @@
 (defsystem :uf
   :class :package-inferred-system
   :description "uf"
-  :version "0.1"
+  :version "0.1.0"
   :author "TANAKA Shinichi"
-  :license "no license"
+  :license ""
   :depends-on ("uf/main"))
