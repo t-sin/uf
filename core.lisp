@@ -46,7 +46,7 @@
                    (return (nreverse code)))))))
 
 (defstruct word name fn start system-p)
-(defstruct vm code ip dict stack rstack)
+(defstruct vm code ip dict stack rstack debug-p)
 (defparameter *dictionary* nil)
 
 (defmethod print-object ((word word) stream)
@@ -80,6 +80,8 @@
   (loop
     :for atom := (get-atom vm)
     :until (null atom)
+    :do (when (vm-debug-p vm)
+          (format t "; name = '~a', stack = ~s~%" atom (vm-stack vm)))
     :do (cond ((eq atom 'uf/dict::|:|)
                (define-word vm))
               ((eq atom 'uf/dict::|;|)
