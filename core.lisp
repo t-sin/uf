@@ -46,7 +46,7 @@
                    (terminate-atom)
                    (return (nreverse code)))))))
 
-(defstruct word name code start system-p)
+(defstruct word name fn start system-p)
 (defstruct vm code ip dict stack rstack)
 (defparameter *dictionary* nil)
 
@@ -90,7 +90,7 @@
               (t  (let ((word (find atom (vm-dict vm) :key #'word-name)))
                     (if word
                         (if (word-system-p word)
-                            (funcall (word-code word) vm)
+                            (funcall (word-fn word) vm)
                             (progn
                               (push (vm-ip vm) (vm-rstack vm))
                               (setf (vm-ip vm) (word-start word))))
