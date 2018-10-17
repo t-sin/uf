@@ -52,9 +52,9 @@
   (let ((o1 (pop (vm-stack vm)))
         (o2 (pop (vm-stack vm)))
         (o3 (pop (vm-stack vm))))
-    (push o3 (vm-stack vm))
     (push o1 (vm-stack vm))
-    (push o2 (vm-stack vm))))
+    (push o2 (vm-stack vm))
+    (push o3 (vm-stack vm))))
 (defword (|drop|)
   (pop (vm-stack vm)))
 
