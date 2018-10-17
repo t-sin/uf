@@ -73,6 +73,11 @@
                    (push 0 (vm-stack vm))))
 
 ;; logical predicate
+(defword (|not|)
+  (let ((o (pop (vm-stack vm))))
+    (if (= o -1)
+        0
+        -1)))
 (defword (|or|) (if (or (= (pop (vm-stack vm)) -1)
                         (= (pop (vm-stack vm)) -1))
                     (push -1 (vm-stack vm))
