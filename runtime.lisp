@@ -61,3 +61,8 @@
 (defword (|-|) (push (- (pop (vm-stack vm)) (pop (vm-stack vm))) (vm-stack vm)))
 (defword (|*|) (push (* (pop (vm-stack vm)) (pop (vm-stack vm))) (vm-stack vm)))
 (defword (|/|) (push (/ (pop (vm-stack vm)) (pop (vm-stack vm))) (vm-stack vm)))
+
+;; arithmatic predicate
+(defword (|=|) (if (= (pop (vm-stack vm)) (pop (vm-stack vm)))
+                   (push -1 (vm-stack vm))
+                   (push 0 (vm-stack vm))))
