@@ -29,6 +29,8 @@
   (terpri))
 (defword (|emit|)
   (format t "~a" (code-char (pop (vm-stack vm)))))
+(defword (|.s|)
+  (format t "~s" (vm-stack vm)))
 
 ;; stack maneuvers
 (defword (|swap|)
