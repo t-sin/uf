@@ -68,3 +68,16 @@
 (defword (|=|) (if (= (pop (vm-stack vm)) (pop (vm-stack vm)))
                    (push -1 (vm-stack vm))
                    (push 0 (vm-stack vm))))
+(defword (|<|) (if (< (pop (vm-stack vm)) (pop (vm-stack vm)))
+                   (push -1 (vm-stack vm))
+                   (push 0 (vm-stack vm))))
+
+;; logical predicate
+(defword (|or|) (if (or (= (pop (vm-stack vm)) -1)
+                        (= (pop (vm-stack vm)) -1))
+                    (push -1 (vm-stack vm))
+                    (push 0 (vm-stack vm))))
+(defword (|and|) (if (and (= (pop (vm-stack vm)) -1)
+                          (= (pop (vm-stack vm)) -1))
+                    (push -1 (vm-stack vm))
+                    (push 0 (vm-stack vm))))
