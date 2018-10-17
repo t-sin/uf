@@ -78,11 +78,18 @@
     (if (= o -1)
         0
         -1)))
-(defword (|or|) (if (or (= (pop (vm-stack vm)) -1)
-                        (= (pop (vm-stack vm)) -1))
-                    (push -1 (vm-stack vm))
-                    (push 0 (vm-stack vm))))
-(defword (|and|) (if (and (= (pop (vm-stack vm)) -1)
-                          (= (pop (vm-stack vm)) -1))
-                    (push -1 (vm-stack vm))
-                    (push 0 (vm-stack vm))))
+(defword (|or|)
+  (loop
+    :for v := (pop (vm-stack vm))
+    :until (null v)
+    :with r := nil
+    :do (print r)
+    :do (setf r (or (= v -1) r))
+    :finally (push (if r -1 0) (vm-stack vm))))
+(defword (|and|)
+  (loop
+    :for v := (pop (vm-stack vm))
+    :until (null v)
+    :with r := t
+    :do (setf r (and (= v -1) r))
+    :finally (push (if r -1 0) (vm-stack vm))))
