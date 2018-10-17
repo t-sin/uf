@@ -23,7 +23,7 @@
 (in-package #:uf)
 
 (defun init-vm (code &optional debug-p)
-  (let ((vm (make-vm :code code :ip 0 :debug-p debug-p)))
+  (let ((vm (make-vm :code code :ip 0 :ifdepth 0 :debug-p debug-p)))
     (setf (vm-dict vm) *dictionary*)
     vm))
 
