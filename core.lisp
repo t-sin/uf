@@ -104,9 +104,9 @@
                (if (zerop (vm-ifdepth vm))
                    (error "unexpected `then`")
                    (progn
+                     (decf (vm-ifdepth vm))
                      (when (= (vm-ifdepth vm) (cdr (vm-skip-to vm)))
-                       (setf (vm-skip-to vm) nil))
-                     (decf (vm-ifdepth vm))))))
+                       (setf (vm-skip-to vm) nil))))))
     :else
     :do (cond ((eq atom 'uf/dict::|:|)
                (define-word vm))
@@ -120,13 +120,14 @@
                (incf (vm-ifdepth vm)))
               ((eq atom 'uf/dict::|else|)
                (cond ((zerop (vm-ifdepth vm)) (error "unexpected `else`"))
-                     ((null (vm-skip-to vm)) (setf (vm-skip-to vm) (cons :true (vm-ifdepth vm))))))
+                     ((null (vm-skip-to vm)) (setf (vm-skip-to vm) (cons :true (1- (vm-ifdepth vm)))))))
               ((eq atom 'uf/dict::|then|)
                (if (zerop (vm-ifdepth vm))
                    (error "unexpected `else`")
                    (progn
-                     (setf (vm-skip-to vm) nil)
-                     (decf (vm-ifdepth vm)))))
+                     (decf (vm-ifdepth vm))
+                     (when (and (vm-skip-to vm) (> (vm-ifdepth vm) (cdr (vm-skip-to vm)))))
+                       (setf (vm-skip-to vm) nil))))
               (t (let ((word (find atom (vm-dict vm) :key #'word-name)))
                    (if word
                        (if (word-system-p word)
