@@ -17,6 +17,22 @@ $ ros install t-sin/uf
 
 ## Usage
 
+In REPL, you can use one-shot VM:
+
+```
+;; calculating Fibonacci number of 10
+CL-USER> (with-input-from-string
+             (in "
+: <= over over < rot swap = or ;
+: fib dup 0 swap <= if drop 0 else dup 1 = if drop 1 else
+  dup 1 swap - fib swap 2 swap - fib + then then ;
+10 fib")
+           (let ((vm (uf:init-vm (uf:parse in))))
+             (uf:execute vm)
+             vm))
+#<VM: (55)>
+```
+
 If you want to run *uf* with REPL, roswell script satisfies you:
 
 ```
