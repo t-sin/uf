@@ -14,8 +14,8 @@
 (defstruct vm
   ip compiling dict pstack rstack cstack)
 
-(defun make-word% (dict name code immediate)
-  (make-word :prev dict :name name :code code :immediate immediate))
+(defun make-word% (dict name immediate code)
+  (make-word :prev dict :name name :immediate immediate :code code))
 
 (defun make-stack (size)
   (let ((stack (make-array size :element-type 'cell))
@@ -46,3 +46,15 @@
                       :rstack (make-stack rstack-size)
                       :cstack (make-stack cstack-size))))
     vm))
+
+(defvar vm (init-vm))
+
+(defmacro defword ((name immediate) &body code)
+  (let (($vm (gensym)))
+    `(make-word% (vm-dict vm) ',name ,immediate (lambda (,$vm) ,@code))))
+
+(defword (create nil)
+  (make-word% (vm-dict vm)
+              (funcall (vm-pstack vm) :pop)
+              nil
+              #(1 2 3 4)))
