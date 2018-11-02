@@ -9,13 +9,10 @@
   type data)
 
 (defstruct word
-  prev name code immediate)
+  prev name code-start data immediate)
 
 (defstruct vm
   ip compiling dict pstack rstack cstack)
-
-(defun make-word% (dict name immediate code)
-  (make-word :prev dict :name name :immediate immediate :code code))
 
 (defun make-stack (size)
   (let ((stack (make-array size :element-type 'cell))
@@ -34,27 +31,27 @@
                                    (values nil :empty)))
                       (t (values (svref stack top) t)))))))))
 
-(defvar pstack-size 1000)
-(defvar rstack-size 1000)
-(defvar cstack-size 1000)
+(defvar *pstack-size* 1000)
+(defvar *rstack-size* 1000)
+(defvar *cstack-size* 1000)
 
 (defun init-vm ()
   (let* ((vm (make-vm :ip nil
                       :compiling nil
-                      :dict (make-word% nil nil nil nil)
-                      :pstack (make-stack pstack-size)
-                      :rstack (make-stack rstack-size)
-                      :cstack (make-stack cstack-size))))
+                      :dict (make-word :prev nil
+                                       :name nil
+                                       :code-start nil
+                                       :data nil
+                                       :immediate nil)
+                      :pstack (make-stack *pstack-size*)
+                      :rstack (make-stack *rstack-size*)
+                      :cstack (make-stack *cstack-size*))))
     vm))
 
-(defvar vm (init-vm))
-
-(defmacro defword ((name immediate) &body code)
-  (let (($vm (gensym)))
-    `(make-word% (vm-dict vm) ',name ,immediate (lambda (,$vm) ,@code))))
-
-(defword (create nil)
-  (make-word% (vm-dict vm)
-              (funcall (vm-pstack vm) :pop)
-              nil
-              #(1 2 3 4)))
+(defun add-word (vm name code-start data immediate)
+  (let ((word (make-word :name name
+                         :code-start code-start
+                         :data data
+                         :immediate immediate)))
+    (setf (word-prev word) (vm-dict vm))
+    (setf (vm-dict vm) word)))
