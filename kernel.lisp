@@ -5,8 +5,24 @@
 
 (defvar types '(flag char number xt addr))
 
+;;; | type (8bit) | data (32bit) |
 (defstruct cell
   type data)
+
+(defun bytes->cell (bytes)
+  (if (and (typep bytes '(array (unsigned-byte 8) (#.(+ 1 4))))
+           (= (length bytes) #.(+ 1 4)))
+      (let ((cell (make-cell :type (aref bytes 0)
+                             :data (subseq bytes 1 5))))
+        cell)
+      (error "it's not a byte representation of cell")))
+
+(defun cell->bytes (cell)
+  (if (cell-p cell)
+      (make-array 5 :element-type '(unsigned-byte 5)
+                  :initial-contents (concatenate '(array (unsigned-byte 8) (#.(+ 1 4)))
+                                                 (list (cell-type cell)) (cell-data cell)))
+      (error "it's not a cell")))
 
 (defstruct word
   prev name code-start data immediate)
