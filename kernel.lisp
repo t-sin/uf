@@ -71,3 +71,26 @@
                          :immediate immediate)))
     (setf (word-prev word) (vm-dict vm))
     (setf (vm-dict vm) word)))
+
+(defun find-word (vm name)
+  (loop
+    :for w := (vm-dict vm) :then (word-prev w)
+    :until (eql w nil)
+    :do (when (eql (word-name w) name)
+          (return-from find-word w))))
+
+(defun interpret (vm program)
+  (loop
+    :with prog := program
+    :with ip := 0
+    :while (and (>= ip 0) (< ip (length prog)))
+    :for atom := (aref prog ip)
+    :do (let ((w (find-word vm atom)))
+          (if (null w)
+              (error "undefined word '~s'~%" atom)
+              (if (word-builtin w)
+                  (funcall (word-fn w) vm)
+                  (progn
+                    (funcall (vm-rstack vm) :push (cons ip prog))
+                    (setf prog (word-code w)
+                          ip 0)))))))
