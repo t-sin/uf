@@ -72,6 +72,15 @@
     (setf (word-prev word) (vm-dict vm))
     (setf (vm-dict vm) word)))
 
+(defun add-builtin-word (vm name fn data immediate)
+  (let ((word (make-word :name name
+                         :fn fn
+                         :data data
+                         :immediate immediate
+                         :builtin t)))
+    (setf (word-prev word) (vm-dict vm))
+    (setf (vm-dict vm) word)))
+
 (defun find-word (vm name)
   (loop
     :for w := (vm-dict vm) :then (word-prev w)
@@ -95,3 +104,13 @@
                              :push (cons (vm-ip vm) (vm-program vm)))
                     (setf (vm-program vm) (word-code w)
                           (vm-ip vm) 0)))))))
+
+(defmacro with-ufvm ((var) &body body)
+  `(let ((,var (init-vm))) ,@body))
+
+;; Use in `with-vm`
+(defmacro add-word ((name immediate) data &body body)
+  (let (($vm (gensym "builtin-arg")))
+    `(add-builtin-word vm ',name
+                       (lambda (,$vm) (declare (ignorable ,$vm))  ,@(substitute $vm 'vm body))
+                       ,data ,immediate)))
