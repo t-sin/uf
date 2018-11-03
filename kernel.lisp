@@ -105,12 +105,24 @@
                     (setf (vm-program vm) (word-code w)
                           (vm-ip vm) 0)))))))
 
-(defmacro with-ufvm ((var) &body body)
+(defmacro with-vm ((var) &body body)
   `(let ((,var (init-vm))) ,@body))
 
 ;; Use in `with-vm`
-(defmacro add-word ((name immediate) data &body body)
+(defmacro add-word ((name immediate data) &body body)
   (let (($vm (gensym "builtin-arg")))
     `(add-builtin-word vm ',name
                        (lambda (,$vm) (declare (ignorable ,$vm))  ,@(substitute $vm 'vm body))
                        ,data ,immediate)))
+
+;; usage:
+;;   (let ((vm (with-initial-vm (vm)
+;;               (next nil nil
+;;                 (print 'next-called)
+;;                 (incf (vm-ip vm))))))
+;;     (interpret vm '#(next)))
+(defmacro with-initial-vm ((var) &body worddefs)
+  `(with-vm (,var)
+     ,@(mapcar (lambda (def) `(add-word (,(car def) ,(cadr def) ,(caddr def)) ,@(cdddr def)))
+               worddefs)
+     vm))
