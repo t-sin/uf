@@ -1,6 +1,6 @@
 (defpackage #:uf/kernel
   (:use #:cl)
-  (:export #:vm-prgram
+  (:export #:vm-program
            #:vm-ip
            #:vm-compiling
            #:vm-dict
