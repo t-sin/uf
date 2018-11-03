@@ -25,7 +25,7 @@
       (error "it's not a cell")))
 
 (defstruct word
-  prev name code-start data immediate)
+  prev name code fn data immediate builtin)
 
 (defstruct vm
   ip compiling dict pstack rstack cstack)
@@ -56,7 +56,7 @@
                       :compiling nil
                       :dict (make-word :prev nil
                                        :name nil
-                                       :code-start nil
+                                       :code nil
                                        :data nil
                                        :immediate nil)
                       :pstack (make-stack *pstack-size*)
@@ -64,9 +64,9 @@
                       :cstack (make-stack *cstack-size*))))
     vm))
 
-(defun add-word (vm name code-start data immediate)
+(defun add-word (vm name code data immediate)
   (let ((word (make-word :name name
-                         :code-start code-start
+                         :code code
                          :data data
                          :immediate immediate)))
     (setf (word-prev word) (vm-dict vm))
