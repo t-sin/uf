@@ -109,7 +109,7 @@
   `(let ((,var (init-vm))) ,@body))
 
 ;; Use in `with-vm`
-(defmacro add-word ((name immediate data) &body body)
+(defmacro define-word ((name immediate data) &body body)
   (let (($vm (gensym "builtin-arg")))
     `(add-builtin-word vm ',name
                        (lambda (,$vm) (declare (ignorable ,$vm))  ,@(substitute $vm 'vm body))
@@ -117,12 +117,12 @@
 
 ;; usage:
 ;;   (let ((vm (with-initial-vm (vm)
-;;               (next nil nil
-;;                 (print 'next-called)
-;;                 (incf (vm-ip vm))))))
+;;               ((next nil nil)
+;;                (print 'next-called)
+;;                (incf (vm-ip vm))))))
 ;;     (interpret vm '#(next)))
 (defmacro with-initial-vm ((var) &body worddefs)
   `(with-vm (,var)
-     ,@(mapcar (lambda (def) `(add-word (,(car def) ,(cadr def) ,(caddr def)) ,@(cdddr def)))
+     ,@(mapcar (lambda (def) `(define-word (,(caar def) ,(cadar def) ,(caddar def)) ,@(cdr def)))
                worddefs)
      vm))
