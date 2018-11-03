@@ -28,7 +28,7 @@
   prev name code-start data immediate)
 
 (defstruct vm
-  ip compiling dict memory pstack rstack cstack)
+  ip compiling dict pstack rstack cstack)
 
 (defun make-stack (size)
   (let ((stack (make-array size :element-type 'cell))
@@ -59,7 +59,6 @@
                                        :code-start nil
                                        :data nil
                                        :immediate nil)
-                      :memory (make-array 10000 :element-type '(unsigned-byte 8))
                       :pstack (make-stack *pstack-size*)
                       :rstack (make-stack *rstack-size*)
                       :cstack (make-stack *cstack-size*))))
