@@ -28,7 +28,7 @@
   prev name code fn data immediate builtin)
 
 (defstruct vm
-  ip compiling dict pstack rstack cstack)
+  program ip compiling dict pstack rstack cstack)
 
 (defun make-stack (size)
   (let ((stack (make-array size :element-type 'cell))
@@ -52,7 +52,7 @@
 (defvar *cstack-size* 1000)
 
 (defun init-vm ()
-  (let* ((vm (make-vm :ip nil
+  (let* ((vm (make-vm :program nil :ip nil
                       :compiling nil
                       :dict (make-word :prev nil
                                        :name nil
@@ -80,17 +80,18 @@
           (return-from find-word w))))
 
 (defun interpret (vm program)
+  (setf (vm-ip vm) 0
+        (vm-program vm) program)
   (loop
-    :with prog := program
-    :with ip := 0
-    :while (and (>= ip 0) (< ip (length prog)))
-    :for atom := (aref prog ip)
+    :while (and (>= (vm-ip vm) 0) (< (vm-ip vm) (length (vm-program vm))))
+    :for atom := (aref (vm-program vm) (vm-ip vm))
     :do (let ((w (find-word vm atom)))
           (if (null w)
               (error "undefined word '~s'~%" atom)
               (if (word-builtin w)
                   (funcall (word-fn w) vm)
                   (progn
-                    (funcall (vm-rstack vm) :push (cons ip prog))
-                    (setf prog (word-code w)
-                          ip 0)))))))
+                    (funcall (vm-rstack vm)
+                             :push (cons (vm-ip vm) (vm-program vm)))
+                    (setf (vm-program vm) (word-code w)
+                          (vm-ip vm) 0)))))))
