@@ -1,6 +1,17 @@
 (defpackage #:uf/kernel
   (:use #:cl)
-  (:export #:cell))
+  (:export #:vm-prgram
+           #:vm-ip
+           #:vm-compiling
+           #:vm-dict
+           #:vm-pstack
+           #:vm-rstack
+           #:vm-cstack
+           #:vm
+
+           #:interpret
+           #:with-initial-vm
+           #:define-word))
 (in-package #:uf/kernel)
 
 (defvar types '(flag char number xt addr))
@@ -105,13 +116,15 @@
                     (setf (vm-program vm) (word-code w)
                           (vm-ip vm) 0)))))))
 
-(defmacro with-vm ((var) &body body)
-  `(let ((,var (init-vm))) ,@body))
+(defmacro with-vm (() &body body)
+  `(let ((,'vm (init-vm)))
+     (declare (ignorable vm))
+     ,@body))
 
 ;; Use in `with-vm`
 (defmacro define-word ((name immediate data) &body body)
   (let (($vm (gensym "builtin-arg")))
-    `(add-builtin-word vm ',name
+    `(add-builtin-word ,'vm ',name
                        (lambda (,$vm) (declare (ignorable ,$vm))  ,@(substitute $vm 'vm body))
                        ,data ,immediate)))
 
@@ -121,8 +134,8 @@
 ;;                (print 'next-called)
 ;;                (incf (vm-ip vm))))))
 ;;     (interpret vm '#(next)))
-(defmacro with-initial-vm ((var) &body worddefs)
-  `(with-vm (,var)
+(defmacro with-initial-vm (() &body worddefs)
+  `(with-vm ()
      ,@(mapcar (lambda (def) `(define-word (,(caar def) ,(cadar def) ,(caddar def)) ,@(cdr def)))
                worddefs)
-     vm))
+     ,'vm))
