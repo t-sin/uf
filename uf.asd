@@ -11,4 +11,4 @@
   :version "0.1.0"
   :author "TANAKA Shinichi"
   :license ""
-  :depends-on ())
+  :depends-on ("uf/main"))
