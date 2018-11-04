@@ -9,6 +9,11 @@
            #:vm-cstack
            #:vm
 
+           #:init-vm
+           #:add-word
+           #:add-builtin-word
+           #:find-word
+
            #:interpret
            #:with-initial-vm
            #:define-word))
@@ -115,20 +120,3 @@
                              :push (cons (vm-ip vm) (vm-program vm)))
                     (setf (vm-program vm) (word-code w)
                           (vm-ip vm) 0)))))))
-
-(defmacro with-vm (() &body body)
-  `(let ((,'vm (init-vm)))
-     (declare (ignorable vm))
-     ,@body))
-
-(defmacro define-word ((name immediate data) &body body)
-  (let (($vm (gensym "builtin-arg")))
-    `(add-builtin-word ,'vm ',name
-                       (lambda (,$vm) (declare (ignorable ,$vm))  ,@(substitute $vm 'vm body))
-                       ,data ,immediate)))
-
-(defmacro with-initial-vm (() &body worddefs)
-  `(with-vm ()
-     ,@(mapcar (lambda (def) `(define-word (,(caar def) ,(cadar def) ,(caddar def)) ,@(cdr def)))
-               worddefs)
-     ,'vm))
