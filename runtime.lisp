@@ -12,11 +12,18 @@
     ((:nest nil nil)
      (print :nest-called)
      (funcall (vm-rstack vm) :push (cons (vm-ip vm) (vm-program vm)))
-     (setf (vm-program vm) (funcall (vm-pstack vm) :pop)
-           (vm-ip vm) 0))
+     (multiple-value-bind (value status)
+         (funcall (vm-pstack vm) :pop)
+       (if (eq status :empty)
+           (error "stack underflow at :nest")
+           (setf (vm-program vm) value
+                 (vm-ip vm) 0))))
     ((:unnest nil nil)
      (print :unnest-called)
-     (destructuring-bind (ip . program)
+     (multiple-value-bind (value status)
          (funcall (vm-rstack vm) :pop)
-       (setf (vm-program vm) program
-             (vm-ip vm) ip)))))
+       (if (eq status :empty)
+           (error "stack underflow at :nest")
+           (destructuring-bind (ip . program) value
+             (setf (vm-program vm) program
+                   (vm-ip vm) ip)))))))
