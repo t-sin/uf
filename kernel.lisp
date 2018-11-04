@@ -107,16 +107,24 @@
 (defun interpret (vm program)
   (setf (vm-ip vm) 0
         (vm-program vm) program)
-  (loop
-    :while (and (>= (vm-ip vm) 0) (< (vm-ip vm) (length (vm-program vm))))
-    :for atom := (aref (vm-program vm) (vm-ip vm))
-    :do (let ((w (find-word vm atom)))
-          (if (null w)
-              (error "undefined word '~s'~%" atom)
-              (if (word-builtin w)
-                  (funcall (word-fn w) vm)
-                  (progn
-                    (funcall (vm-rstack vm)
-                             :push (cons (vm-ip vm) (vm-program vm)))
-                    (setf (vm-program vm) (word-code w)
-                          (vm-ip vm) 0)))))))
+  (flet ((execute-word (w)
+           (if (word-builtin w)
+               (funcall (word-fn w) vm)
+               (progn
+                 (funcall (vm-rstack vm)
+                          :push (cons (vm-ip vm) (vm-program vm)))
+                 (setf (vm-program vm) (word-code w)
+                       (vm-ip vm) 0)))))
+    (loop
+      :while (and (>= (vm-ip vm) 0) (< (vm-ip vm) (length (vm-program vm))))
+      :for atom := (aref (vm-program vm) (vm-ip vm))
+      :if (vm-compiling vm)
+      :do
+         (progn)
+      :else :do
+         (if (word-p atom)
+             (execute-word atom)
+             (let ((w (find-word vm atom)))
+               (if (null w)
+                   (error "undefined word '~s'~%" atom)
+                   (execute-word w)))))))
