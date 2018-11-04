@@ -117,10 +117,19 @@
                        (vm-ip vm) 0)))))
     (loop
       :while (and (>= (vm-ip vm) 0) (< (vm-ip vm) (length (vm-program vm))))
+      :with cmpbuf := nil
       :for atom := (aref (vm-program vm) (vm-ip vm))
       :if (vm-compiling vm)
       :do
-         (progn)
+         (progn
+           (when (null cmpbuf)
+             (setf cmpbuf (make-array 500 :fill-pointer 0 :adjustable t)))
+           (let ((w (find-word vm atom)))
+             (if (null w)
+                 (error "undefined word '~s'~%" atom)
+                 (if (word-immediate w)
+                     (execute-word w)
+                     (vector-push-extend w cmpbuf)))))
       :else :do
          (if (word-p atom)
              (execute-word atom)
