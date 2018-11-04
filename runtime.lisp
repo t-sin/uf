@@ -9,6 +9,7 @@
     ((:next nil nil)
      (print :next-called)
      (incf (vm-ip vm)))
+
     ((:nest nil nil)
      (print :nest-called)
      (funcall (vm-rstack vm) :push (cons (vm-ip vm) (vm-program vm)))
@@ -18,6 +19,7 @@
            (error "stack underflow at :nest")
            (setf (vm-program vm) value
                  (vm-ip vm) 0))))
+
     ((:unnest nil nil)
      (print :unnest-called)
      (multiple-value-bind (value status)

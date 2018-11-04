@@ -121,19 +121,12 @@
      (declare (ignorable vm))
      ,@body))
 
-;; Use in `with-vm`
 (defmacro define-word ((name immediate data) &body body)
   (let (($vm (gensym "builtin-arg")))
     `(add-builtin-word ,'vm ',name
                        (lambda (,$vm) (declare (ignorable ,$vm))  ,@(substitute $vm 'vm body))
                        ,data ,immediate)))
 
-;; usage:
-;;   (let ((vm (with-initial-vm (vm)
-;;               ((next nil nil)
-;;                (print 'next-called)
-;;                (incf (vm-ip vm))))))
-;;     (interpret vm '#(next)))
 (defmacro with-initial-vm (() &body worddefs)
   `(with-vm ()
      ,@(mapcar (lambda (def) `(define-word (,(caar def) ,(cadar def) ,(caddar def)) ,@(cdr def)))
