@@ -45,4 +45,12 @@
            (error "stack underflow at :nest")
            (destructuring-bind (ip . program) value
              (setf (vm-program vm) program
-                   (vm-ip vm) ip)))))))
+                   (vm-ip vm) ip)))))
+    ((:|[| t nil)
+     (print :enter-interpretaion-called)
+     (setf (vm-compiling vm) nil)
+     (incf (vm-ip vm)))
+    ((:|]| t nil)
+     (print :enter-compilation-called)
+     (setf (vm-compiling vm) t)
+     (incf (vm-ip vm)))))
