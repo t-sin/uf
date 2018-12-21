@@ -5,11 +5,11 @@
 > 
 > --- Colleen, Ursa Major Find
 
-*uf* is a toy implementation of Forth programming language. It's goal is to understand Forth.
+*uf* is an implementation of Forth programming language.
 
 ## Installation
 
-Install *uf* with [roswell](https://github.com/roswell/roswell/):
+Clone this repository and place into ASDF registry. Or if you use [roswell](https://github.com/roswell/roswell/), you can install *uf* like this:
 
 ```
 $ ros install t-sin/uf
@@ -17,29 +17,7 @@ $ ros install t-sin/uf
 
 ## Usage
 
-In REPL, you can use one-shot VM:
-
-```
-;; calculating Fibonacci number of 10
-CL-USER> (with-input-from-string
-             (in "
-: <= over over < rot swap = or ;
-: fib dup 0 swap <= if drop 0 else dup 1 = if drop 1 else
-  dup 1 swap - fib swap 2 swap - fib + then then ;
-10 fib")
-           (let ((vm (uf:init-vm (uf:parse in))))
-             (uf:execute vm)
-             vm))
-#<VM: (55)>
-```
-
-If you want to run *uf* with REPL, roswell script satisfies you:
-
-```
-$ ./roswell/ufi.ros
-```
-
-If you want to see data stack each input, specify `--debug` option.
+TBD
 
 ## Author
 
