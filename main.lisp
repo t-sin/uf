@@ -209,17 +209,30 @@
                                    ,@body)))
              uf::*initial-word-list*))))
 
-(defword ("(next)" nil nil)
+(defword ("vm/next" nil nil)
   (vm/next vm))
 
-(defword ("(nest)" nil nil)
+(defword ("vm/nest" nil nil)
   (vm/nest vm (stack-pop (vm-pstack vm))))
 
-(defword ("(unnest)" nil nil)
+(defword ("vm/unnest" nil nil)
   (vm/unnest vm))
 
-(defword (".hello" nil nil)
-  (format t "hello!~%"))
+(defword ("vm/create" nil nil)
+  (vm/create vm))
+
+(defword ("vm/name" nil nil)
+  (vm/name vm (next-token (vm-stream vm))))
+
+(defword ("vm/find" nil nil)
+  (vm/find vm (stack-pop (vm-pstack vm))))
+
+(defword ("[" t nil)
+  (vm/interpret vm))
+
+(defword ("]" t nil)
+  (vm/compile vm))
+
 
 ;;;;
 ;; runtime
