@@ -69,3 +69,48 @@
         (incf (stack-ptr stack)))))
 
 ;;;;
+;; interpreter
+
+(defvar +types+ '(:flag :char :number :xt :addr))
+(defvar +stack-size+ 1000)
+
+(defstruct cell
+  type data)
+
+(defstruct word
+  prev name builtin? immediate? builtin-fn code data)
+
+(defstruct vm
+  program dict ip comp? dstack rstack)
+
+(defun init-vm ()
+  (make-vm :program nil
+           :dict (make-word)
+           :dstack (make-stack +stack-size+)
+           :rstack (make-stack +stack-size+)
+           :ip nil
+           :comp? nil))
+
+(defun add-builtin-word (vm name immediate? fn data)
+  (let ((w (make-word :name name
+                      :builtin? t
+                      :immediate? immediate?
+                      :builtin-fn fn
+                      :data data)))
+    (setf (word-prev w) (vm-dict vm))
+    (setf (vm-dict vm) w)))
+
+(defun add-word (vm name immediate? code data)
+  (let ((w (make-word :name name
+                      :builtin? nil
+                      :immediate? immediate?
+                      :code code :data data)))
+    (setf (word-prev w) (vm-dict vm))
+    (setf (vm-dict vm) w)))
+
+(defun find-word (vm name)
+  (loop
+    :for w := (vm-dict vm) :then (wrod-prev w)
+    :until (eq w nil)
+    :do (when (string= (word-name w) name)
+          (return-from find-word w))))
