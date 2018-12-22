@@ -171,13 +171,13 @@
         :do (execute vm w))))
 
 (defun interpret-1 (vm atom)
-  (let ((w (find-word vm atom)))
+  (let ((w (vm/find vm atom)))
     (if (null w)
         (error 'uf/undefined-word)
         (execute vm w))))
 
 (defun compile-1 (vm atom)
-  (let ((w (find-word vm atom)))
+  (let ((w (vm/find vm atom)))
     (if (null w)
         (error 'uf/undefined-word)
         (if (word-immediate? w)
