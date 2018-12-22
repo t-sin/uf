@@ -22,10 +22,10 @@
     (skip-delimiters stream)
     (loop
       :for ch := (peek-char nil stream nil :eof)
-      :if (or (eq ch :eof) (member ch +delimiters+ :test #'char=))
-      :do (return-from next-token (coerce (nreverse buf) 'string))
-      :else
-      :do (push (read-char stream) buf))))
+      :until (or (eq ch :eof) (member ch +delimiters+ :test #'char=))
+      :do (push (read-char stream) buf)
+      :finally (unless (null buf)
+                 (return-from next-token (coerce (nreverse buf) 'string))))))
 
 (defun read-to (ch stream)
   (let (buf)
