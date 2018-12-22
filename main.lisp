@@ -46,9 +46,9 @@
 (defstruct stack
   vec ptr len)
 
-(defclass uf/stack (uf/error) ())
-(defclass uf/stack/full (uf/stack) ())
-(defclass uf/stack/empty (uf/stack) ())
+(define-condition uf/stack (uf/error) ())
+(define-condition uf/stack/full (uf/stack) ())
+(define-condition uf/stack/empty (uf/stack) ())
 
 (defun make-stack* (size)
   (make-stack :vec (coerce (make-array size) 'simple-vector)
