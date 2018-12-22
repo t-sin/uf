@@ -124,6 +124,7 @@
 (define-condition uf/empty-program (uf/error) ())
 
 (defun execute-1 (vm word)
+  (format t "; ~a~%" (word-name word))
   (if (word-builtin? word)
       (funcall (word-builtin-fn word) vm word)
       (progn
