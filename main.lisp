@@ -83,13 +83,13 @@
   prev name builtin? immediate? builtin-fn code data)
 
 (defstruct vm
-  stream program dict ip comp? compbuf dstack rstack)
+  stream program dict ip comp? compbuf pstack rstack)
 
 (defun make-vm* ()
   (make-vm :stream nil
            :program nil
            :dict (make-word)
-           :dstack (make-stack* +stack-size+)
+           :pstack (make-stack* +stack-size+)
            :rstack (make-stack* +stack-size+)
            :ip nil
            :comp? nil))
