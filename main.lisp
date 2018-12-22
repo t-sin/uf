@@ -103,6 +103,7 @@
     (setf (word-prev w) (vm-dict vm))
     (setf (vm-dict vm) w)))
 
+
 (defun add-word (vm name immediate? data code)
   (let ((w (make-word :name name
                       :builtin? nil
@@ -111,47 +112,76 @@
     (setf (word-prev w) (vm-dict vm))
     (setf (vm-dict vm) w)))
 
-(defun find-word (vm name)
+;;;;
+;; vm instructions
+(defun vm/find (vm name)
   (loop
     :for w := (vm-dict vm) :then (word-prev w)
     :until (eq w nil)
     :do (when (string= (word-name w) name)
-          (return-from find-word w))))
+          (return-from vm/find w))))
+
+(defun vm/create (vm)
+  (add-word vm :noname nil nil nil))
+
+(defun vm/name (vm name)
+  (setf (word-name (vm-dict vm)) name))
+
+(defun vm/compile (vm)
+  (setf (vm-comp? vm) t))
+
+(defun vm/interpret (vm)
+  (setf (vm-comp? vm) nil))
+
+(defun vm/nest (vm program)
+  (if (null (vm-program vm))
+      (stack-push nil (vm-rstack vm))
+      (stack-push (cons (vm-program vm) (vm-ip vm)) (vm-rstack vm)))
+  (setf (vm-program vm) program
+        (vm-ip vm) 0))
+
+(defun vm/unnest (vm)
+  (let ((ip (stack-pop (vm-rstack vm))))
+    (if (null ip)
+        (setf (vm-program vm) nil
+              (vm-ip vm) 0)
+        (setf (vm-program vm) (car ip)
+              (vm-ip vm) (cdr ip)))))
+
+(defun vm/next (vm)
+  (let ((ip (vm-ip vm)))
+    (unless (null ip)
+      (let ((next (1+ ip)))
+        (if (< ip (length (vm-program vm)))
+            (setf (vm-ip vm) next)
+            (vm/unnest vm))))))
 
 ;;;;
 ;; interpreter
 
 (define-condition uf/empty-program (uf/error) ())
 
-(defun execute-1 (vm word)
+(defun execute (vm word)
   (format t "; ~a~%" (word-name word))
   (if (word-builtin? word)
       (funcall (word-builtin-fn word) vm word)
-      (progn
-        (if (null (vm-program vm))
-            (stack-push nil (vm-rstack vm))
-            (stack-push (cons (vm-program vm) (vm-ip vm)) (vm-rstack vm)))
-        (setf (vm-program vm) (word-code word)
-              (vm-ip vm) 0)
-        ;; TODO: this *instruction pointer proceeding* should be a word `next`
-        ;; and it shouled be called by each word.
-        (loop
-          :while (< (vm-ip vm) (length (vm-program vm)))
-          :for w := (svref (vm-program vm) (vm-ip vm))
-          :do (execute-1 vm w)))))
+      (loop
+        :while (< (vm-ip vm) (length (vm-program vm)))
+        :for w := (svref (vm-program vm) (vm-ip vm))
+        :do (execute vm w))))
 
 (defun interpret-1 (vm atom)
   (let ((w (find-word vm atom)))
     (if (null w)
         (error 'uf/undefined-word)
-        (execute-1 vm w))))
+        (execute vm w))))
 
 (defun compile-1 (vm atom)
   (let ((w (find-word vm atom)))
     (if (null w)
         (error 'uf/undefined-word)
         (if (word-immediate? w)
-            (execute-1 vm w)
+            (execute vm w)
             (push w (vm-compbuf vm))))))
 
 (defun interpret (vm)
@@ -180,22 +210,13 @@
              uf::*initial-word-list*))))
 
 (defword ("(next)" nil nil)
-  ;; TODO: if the end of vm-program
-  (unless (null (vm-ip vm))
-    (incf (vm-ip vm))))
+  (vm/next vm))
 
 (defword ("(nest)" nil nil)
-  (if (null (vm-program vm))
-      (stack-push nil (vm-rstack vm))
-      (stack-push (cons (vm-program vm) (vm-ip vm)) (vm-rstack vm))))
+  (vm/nest vm (stack-pop (vm-pstack vm))))
 
 (defword ("(unnest)" nil nil)
-  (let ((ip (stack-pop (vm-rstack vm))))
-    (if (null ip)
-        (setf (vm-program vm) nil
-              (vm-ip vm) 0)
-        (setf (vm-program vm) (car ip)
-              (vm-ip vm) (cdr ip)))))
+  (vm/unnest vm))
 
 (defword (".hello" nil nil)
   (format t "hello!~%"))
