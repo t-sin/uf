@@ -132,6 +132,8 @@
             (stack-push (cons (vm-program vm) (vm-ip vm)) (vm-rstack vm)))
         (setf (vm-program vm) (word-code word)
               (vm-ip vm) 0)
+        ;; TODO: this *instruction pointer proceeding* should be a word `next`
+        ;; and it shouled be called by each word.
         (loop
           :while (< (vm-ip vm) (length (vm-program vm)))
           :for w := (svref (vm-program vm) (vm-ip vm))
