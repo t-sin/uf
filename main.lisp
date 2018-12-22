@@ -83,17 +83,18 @@
   prev name builtin? immediate? builtin-fn code data)
 
 (defstruct vm
-  program dict ip comp? compbuf dstack rstack)
+  stream program dict ip comp? compbuf dstack rstack)
 
 (defun make-vm* ()
-  (make-vm :program nil
+  (make-vm :stream nil
+           :program nil
            :dict (make-word)
            :dstack (make-stack* +stack-size+)
            :rstack (make-stack* +stack-size+)
            :ip nil
            :comp? nil))
 
-(defun add-builtin-word (vm name immediate? fn data)
+(defun add-builtin-word (vm name immediate? data fn)
   (let ((w (make-word :name name
                       :builtin? t
                       :immediate? immediate?
@@ -102,7 +103,7 @@
     (setf (word-prev w) (vm-dict vm))
     (setf (vm-dict vm) w)))
 
-(defun add-word (vm name immediate? code data)
+(defun add-word (vm name immediate? data code)
   (let ((w (make-word :name name
                       :builtin? nil
                       :immediate? immediate?
@@ -120,35 +121,72 @@
 ;;;;
 ;; interpreter
 
-(defun execute-word (vm word)
+(define-condition uf/empty-program (uf/error) ())
+
+(defun execute-1 (vm word)
   (if (word-builtin? word)
       (funcall (word-builtin-fn word) vm word)
       (progn
-        (stack-push (cons (vm-program vm) (vm-ip vm)) (vm-rstack vm))
+        (if (null (vm-program vm))
+            (stack-push nil (vm-rstack vm))
+            (stack-push (cons (vm-program vm) (vm-ip vm)) (vm-rstack vm)))
         (setf (vm-program vm) (word-code word)
-              (vm-ip vm) 0))))
+              (vm-ip vm) 0)
+        (loop
+          :while (< (vm-ip vm) (length (vm-program vm)))
+          :for w := (svref (vm-program vm) (vm-ip vm))
+          :do (execute-1 vm w)))))
 
 (defun interpret-1 (vm atom)
-  (if (word-p atom)
-      (execute-word vm atom)
-      (let ((w (find-word vm atom)))
-        (if (null w)
-            (error 'uf/undefined-word)
-            (execute-word vm w)))))
+  (let ((w (find-word vm atom)))
+    (if (null w)
+        (error 'uf/undefined-word)
+        (execute-1 vm w))))
 
 (defun compile-1 (vm atom)
   (let ((w (find-word vm atom)))
     (if (null w)
         (error 'uf/undefined-word)
         (if (word-immediate? w)
-            (execute-word vm w)
+            (execute-1 vm w)
             (push w (vm-compbuf vm))))))
 
 (defun interpret (vm)
   (loop
-    :while (and (>= (vm-ip vm) 0) (< (vm-ip vm) (length (vm-program vm))))
-    :for atom := (svref (vm-program vm) (vm-ip vm))
+    :for atom := (next-token (vm-stream vm))
+    :until (null atom)
     :if (vm-comp? vm)
     :do (compile-1 vm atom)
     :else
     :do (interpret-1 vm atom)))
+
+;;;;
+;; built-in words
+
+(defparameter *initial-word-list* nil)
+
+(defmacro defword ((name immediate? data) &body body)
+  (let (($vm (gensym "defw/vm"))
+        ($word (gensym "defw/w"))
+        ($actual-vm (gensym "defw/avm")))
+    `(flet ()
+       (push (lambda (,$actual-vm)
+               (add-builtin-word ,$actual-vm ,name ,immediate? ,data
+                                 (lambda (,$vm ,$word)
+                                   (declare (ignorable ,$vm ,$word))
+                                   ,@body)))
+             uf::*initial-word-list*))))
+
+(defword (".hello" nil nil)
+  (format t "hello!~%"))
+
+;;;;
+;; runtime
+
+(defun init-vm (stream &optional (word-list uf::*initial-word-list*))
+  (let ((vm (make-vm*)))
+    (loop
+      :for def :in (reverse word-list)
+      :do (funcall def vm))
+    (setf (vm-stream vm) stream)
+    vm))
