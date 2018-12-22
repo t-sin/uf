@@ -167,15 +167,32 @@
 
 (defmacro defword ((name immediate? data) &body body)
   (let (($vm (gensym "defw/vm"))
-        ($word (gensym "defw/w"))
-        ($actual-vm (gensym "defw/avm")))
+        ($word (gensym "defw/w")))
     `(flet ()
-       (push (lambda (,$actual-vm)
-               (add-builtin-word ,$actual-vm ,name ,immediate? ,data
+       (push (lambda (vm)
+               (add-builtin-word vm ,name ,immediate? ,data
                                  (lambda (,$vm ,$word)
                                    (declare (ignorable ,$vm ,$word))
                                    ,@body)))
              uf::*initial-word-list*))))
+
+(defword ("(next)" nil nil)
+  ;; TODO: if the end of vm-program
+  (unless (null (vm-ip vm))
+    (incf (vm-ip vm))))
+
+(defword ("(nest)" nil nil)
+  (if (null (vm-program vm))
+      (stack-push nil (vm-rstack vm))
+      (stack-push (cons (vm-program vm) (vm-ip vm)) (vm-rstack vm))))
+
+(defword ("(unnest)" nil nil)
+  (let ((ip (stack-pop (vm-rstack vm))))
+    (if (null ip)
+        (setf (vm-program vm) nil
+              (vm-ip vm) 0)
+        (setf (vm-program vm) (car ip)
+              (vm-ip vm) (cdr ip)))))
 
 (defword (".hello" nil nil)
   (format t "hello!~%"))
