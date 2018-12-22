@@ -122,7 +122,7 @@
 
 (defun execute-word (vm word)
   (if (word-builtin? word)
-      (funcall (word-builtin-fn word) vm)
+      (funcall (word-builtin-fn word) vm w)
       (progn
         (stack-push (cons (vm-program vm) (vm-ip vm)) (vm-rstack vm))
         (setf (vm-program vm) (word-code word)
