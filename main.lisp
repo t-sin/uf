@@ -225,7 +225,8 @@
   (vm/name vm (next-token (vm-stream vm))))
 
 (defword ("vm/find" nil nil)
-  (vm/find vm (stack-pop (vm-pstack vm))))
+  (stack-push (vm/find vm (read-to #\space (vm-stream vm)))
+              (vm-pstack vm)))
 
 (defword ("[" t nil)
   (vm/interpret vm))
@@ -233,6 +234,12 @@
 (defword ("]" t nil)
   (vm/compile vm))
 
+(defword (".s" nil nil)
+  (let ((pstack (vm-pstack vm)))
+    (loop
+      :for n :from 0 :below (stack-ptr pstack)
+      :do (format t "~s " (svref (stack-vec pstack) n))
+      :finally (terpri))))
 
 ;;;;
 ;; runtime
