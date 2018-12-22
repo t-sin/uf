@@ -69,10 +69,12 @@
         (incf (stack-ptr stack)))))
 
 ;;;;
-;; interpreter
+;; vm
 
 (defvar +types+ '(:flag :char :number :xt :addr))
 (defvar +stack-size+ 1000)
+
+(define-condition  uf/undefined-word (uf/error) ())
 
 (defstruct cell
   type data)
@@ -81,9 +83,9 @@
   prev name builtin? immediate? builtin-fn code data)
 
 (defstruct vm
-  program dict ip comp? dstack rstack)
+  program dict ip comp? compbuf dstack rstack)
 
-(defun init-vm ()
+(defun make-vm* ()
   (make-vm :program nil
            :dict (make-word)
            :dstack (make-stack +stack-size+)
@@ -114,3 +116,38 @@
     :until (eq w nil)
     :do (when (string= (word-name w) name)
           (return-from find-word w))))
+
+;;;;
+;; interpreter
+
+(defun execute-word (vm word)
+  (if (word-builtin? word)
+      (funcall (word-builtin-fn word) vm)
+      (progn
+        (stack-push (cons (vm-program vm) (vm-ip vm)) (vm-rstack vm))
+        (setf (vm-program vm) (word-code word)
+              (vm-ip vm) 0))))
+
+(defun interpret-1 (vm atom)
+  (if (word-p atom)
+      (execute-word atom)
+      (let ((w (find-word vm atom)))
+        (if (null w)
+            (error 'uf/undefined-word)
+            (execute-word w)))))
+
+(defun compile-1 (vm atom)
+  (let ((w (find-word atom)))
+    (if (null w)
+        (error 'uf/undefined-word)
+        (if (word-immediate? w)
+            (execute-word w)
+            (push w (vm-compbuf vm))))))
+
+(defun interpret (vm)
+  (loop
+    :while (and (>= (vm-ip vm) 0) (< (vm-ip vm) (length (vm-program vm))))
+    :for atom := (svref (vm-program)
+    :if (vm-comp? vm)
+    :do (compile-1 vm atom)
+    :else (interpret-1 vm atom))))
