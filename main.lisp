@@ -88,8 +88,8 @@
 (defun make-vm* ()
   (make-vm :program nil
            :dict (make-word)
-           :dstack (make-stack +stack-size+)
-           :rstack (make-stack +stack-size+)
+           :dstack (make-stack* +stack-size+)
+           :rstack (make-stack* +stack-size+)
            :ip nil
            :comp? nil))
 
@@ -112,7 +112,7 @@
 
 (defun find-word (vm name)
   (loop
-    :for w := (vm-dict vm) :then (wrod-prev w)
+    :for w := (vm-dict vm) :then (word-prev w)
     :until (eq w nil)
     :do (when (string= (word-name w) name)
           (return-from find-word w))))
@@ -122,7 +122,7 @@
 
 (defun execute-word (vm word)
   (if (word-builtin? word)
-      (funcall (word-builtin-fn word) vm w)
+      (funcall (word-builtin-fn word) vm word)
       (progn
         (stack-push (cons (vm-program vm) (vm-ip vm)) (vm-rstack vm))
         (setf (vm-program vm) (word-code word)
@@ -130,24 +130,25 @@
 
 (defun interpret-1 (vm atom)
   (if (word-p atom)
-      (execute-word atom)
+      (execute-word vm atom)
       (let ((w (find-word vm atom)))
         (if (null w)
             (error 'uf/undefined-word)
-            (execute-word w)))))
+            (execute-word vm w)))))
 
 (defun compile-1 (vm atom)
-  (let ((w (find-word atom)))
+  (let ((w (find-word vm atom)))
     (if (null w)
         (error 'uf/undefined-word)
         (if (word-immediate? w)
-            (execute-word w)
+            (execute-word vm w)
             (push w (vm-compbuf vm))))))
 
 (defun interpret (vm)
   (loop
     :while (and (>= (vm-ip vm) 0) (< (vm-ip vm) (length (vm-program vm))))
-    :for atom := (svref (vm-program)
+    :for atom := (svref (vm-program vm) (vm-ip vm))
     :if (vm-comp? vm)
     :do (compile-1 vm atom)
-    :else (interpret-1 vm atom))))
+    :else
+    :do (interpret-1 vm atom)))
