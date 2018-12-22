@@ -3,16 +3,7 @@
   (:export))
 (in-package #:uf)
 
-(defvar +types+ '(:flag :char :number :xt :addr))
-
-(defstruct cell
-  type data)
-
-(defstruct word
-  prev name builtin? immediate? builtin-fn code data)
-
-(defstruct vm
-  program dict ip comp? dstack rstack)
+(defclass uf/error (simple-error) ())
 
 ;;;;
 ;; readers
@@ -48,3 +39,33 @@
             (return-from read-to (coerce (nreverse buf) 'string)))
       :else
       :do (push (read-char stream) buf))))
+
+;;;;
+;; stack
+
+(defstruct stack
+  vec ptr len)
+
+(defclass uf/stack (uf/error) ())
+(defclass uf/stack/full (uf/stack) ())
+(defclass uf/stack/empty (uf/stack) ())
+
+(defun make-stack* (size)
+  (make-stack :vec (coerce (make-array size) 'simple-vector)
+              :ptr 0 :len size))
+
+(defun pop-stack (stack)
+  (if (zerop (stack-ptr stack))
+      (error 'uf/stack/empty :format-arguments "stack is empty!")
+      (progn
+        (decf (stack-ptr stack))
+        (svref (stack-vec stack) (stack-ptr stack)))))
+
+(defun push-stack (cell stack)
+  (if (= (stack-ptr stack) (stack-len stack))
+      (error 'uf/stack/full :format-arguments "stack is full!")
+      (progn
+        (setf (svref (stack-vec stack) (stack-ptr stack)) cell)
+        (incf (stack-ptr stack)))))
+
+;;;;
