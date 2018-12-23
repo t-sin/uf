@@ -136,6 +136,10 @@
 (defun vm/interpret (vm)
   (setf (vm-comp? vm) nil))
 
+(defun vm/terminate-compile (vm)
+  (setf (word-code (vm-dict vm)) (nreverse (vm-compbuf vm))
+        (vm-compbuf vm) nil))
+
 (defun vm/nest (vm program)
   (if (null (vm-program vm))
       (stack-push nil (vm-rstack vm))
@@ -235,6 +239,9 @@
 (defword ("vm/find" nil nil)
   (stack-push (vm/find vm (read-to #\space (vm-stream vm)))
               (vm-pstack vm)))
+
+(defword ("vm/termcomp" t nil)
+  (vm/terminate-compile vm))
 
 (defword ("[" t nil)
   nil
