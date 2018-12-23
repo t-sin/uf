@@ -209,6 +209,10 @@
                                    (if (vm-comp? vm) ,comp-code ,exec-code))))
              uf::*initial-word-list*))))
 
+(defword ("vm/sem" t nil)
+  (format t "execution semantics!~%")
+  (format t "compilation semantics!~%"))
+
 (defword ("vm/next" nil nil)
   (vm/next vm))
 
