@@ -240,6 +240,12 @@
 (defword ("]" t nil)
   (vm/compile vm))
 
+(defword ("immediate" nil nil)
+  (setf (word-immediate? (vm-dict vm)) t))
+
+(defword ("postpone" t nil)
+  (format t "TODO: POSTPONE is not implemented.~%"))
+
 (defword (".s" nil nil)
   (let ((pstack (vm-pstack vm)))
     (loop
