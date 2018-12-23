@@ -198,7 +198,7 @@
 
 (defparameter *initial-word-list* nil)
 
-(defmacro defword ((name immediate? data) &body body)
+(defmacro defword ((name immediate? data) exec-code &optional comp-code)
   (let (($vm (gensym "defw/vm"))
         ($word (gensym "defw/w")))
     `(flet ()
@@ -206,7 +206,7 @@
                (add-builtin-word vm ,name ,immediate? ,data
                                  (lambda (,$vm ,$word)
                                    (declare (ignorable ,$vm ,$word))
-                                   ,@body)))
+                                   (if (vm-comp? vm) ,comp-code ,exec-code))))
              uf::*initial-word-list*))))
 
 (defword ("vm/next" nil nil)
