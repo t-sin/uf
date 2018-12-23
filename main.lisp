@@ -82,6 +82,9 @@
 (defstruct word
   prev name builtin? immediate? builtin-fn code data)
 
+(defmethod print-object ((word word) stream)
+  (format stream "~a" (word-name word)))
+
 (defstruct vm
   stream program dict ip comp? compbuf pstack rstack)
 
