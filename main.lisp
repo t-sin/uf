@@ -199,15 +199,16 @@
 (defparameter *initial-word-list* nil)
 
 (defmacro defword ((name immediate? data) exec-code &optional comp-code)
-  (let (($vm (gensym "defw/vm"))
-        ($word (gensym "defw/w")))
+  (let (($vm (gensym "defw/vm")))
     `(flet ()
-       (push (lambda (vm)
-               (add-builtin-word vm ,name ,immediate? ,data
-                                 (lambda (,$vm ,$word)
-                                   (declare (ignorable ,$vm ,$word))
+       (push (lambda (,$vm)
+               (add-builtin-word ,$vm ,name ,immediate? ,data
+                                 (lambda (vm word)
+                                   (declare (ignorable vm word))
                                    (if (vm-comp? vm) ,comp-code ,exec-code))))
              uf::*initial-word-list*))))
+
+;; Low level words
 
 (defword ("vm/sem" t nil)
   (format t "execution semantics!~%")
@@ -233,6 +234,7 @@
               (vm-pstack vm)))
 
 (defword ("[" t nil)
+  nil
   (vm/interpret vm))
 
 (defword ("]" t nil)
