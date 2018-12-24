@@ -266,6 +266,11 @@
                 (vm-pstack vm))
     (vm/next vm)))
 
+(defword ("vm/clearcomp" t nil)
+  (progn
+    (setf (vm-compbuf vm) nil)
+    (vm/next vm)))
+
 (defword ("vm/termcomp" t nil)
   (progn
     (vm/terminate-compile vm)
