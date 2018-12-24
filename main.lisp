@@ -184,8 +184,7 @@
         (loop
           :while (< (vm-ip vm) (length (vm-program vm)))
           :for w := (svref (vm-program vm) (vm-ip vm))
-          :do (execute vm w))
-        (vm/unnest vm))))
+          :do (execute vm w)))))
 
 (defun interpret-1 (vm atom)
   (let ((w (vm/find vm atom)))
