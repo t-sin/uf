@@ -234,6 +234,11 @@
 (defword ("vm/next" nil nil)
   (vm/next vm))
 
+(defword ("vm/self" nil nil)
+  (progn
+    (stack-push word (vm-pstack vm))
+    (vm/next vm)))
+
 (defword ("vm/nest" nil nil)
   (let ((w (stack-pop (vm-pstack vm))))
     (vm/nest vm (word-code w))
@@ -254,6 +259,9 @@
 
 (defword ("vm/termcomp" t nil)
   (vm/terminate-compile vm))
+
+(defword ("execute" t nil)
+  (execute vm (stack-pop (vm-pstack vm))))
 
 (defword ("[" t nil)
   nil
