@@ -144,7 +144,7 @@
   (setf (vm-comp? vm) nil))
 
 (defun vm/terminate-compile (vm)
-  (setf (word-code (vm-dict vm)) (nreverse (vm-compbuf vm))
+  (setf (word-code (vm-dict vm)) (coerce (nreverse (vm-compbuf vm)) 'simple-vector)
         (vm-compbuf vm) nil))
 
 (defun vm/nest (vm program)
