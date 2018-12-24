@@ -46,6 +46,13 @@
 (defstruct stack
   vec ptr len)
 
+(defmethod print-object ((stack stack) stream)
+  (loop
+    :for n :from 0 :below (stack-ptr stack)
+    :initially (format stream "[")
+    :do (format stream "~s " (svref (stack-vec stack) n))
+    :finally (format stream "]")))
+
 (define-condition uf/stack (uf/error) ())
 (define-condition uf/stack/full (uf/stack) ())
 (define-condition uf/stack/empty (uf/stack) ())
@@ -258,11 +265,7 @@
   (push (vm/find vm (next-token (vm-stream vm))) (vm-compbuf vm)))
 
 (defword (".s" nil nil)
-  (let ((pstack (vm-pstack vm)))
-    (loop
-      :for n :from 0 :below (stack-ptr pstack)
-      :do (format t "~s " (svref (stack-vec pstack) n))
-      :finally (terpri))))
+  (format t "~a~%" (vm-pstack vm)))
 
 ;;;;
 ;; runtime
