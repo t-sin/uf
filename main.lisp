@@ -179,10 +179,13 @@
   (format t "; ~a~%" (word-name word))
   (if (word-builtin? word)
       (funcall (word-builtin-fn word) vm word)
-      (loop
-        :while (< (vm-ip vm) (length (vm-program vm)))
-        :for w := (svref (vm-program vm) (vm-ip vm))
-        :do (execute vm w))))
+      (progn
+        (vm/nest vm (word-code word))
+        (loop
+          :while (< (vm-ip vm) (length (vm-program vm)))
+          :for w := (svref (vm-program vm) (vm-ip vm))
+          :do (execute vm w))
+        (vm/unnest vm))))
 
 (defun interpret-1 (vm atom)
   (let ((w (vm/find vm atom)))
