@@ -254,7 +254,8 @@
   (setf (word-immediate? (vm-dict vm)) t))
 
 (defword ("postpone" t nil)
-  (format t "TODO: POSTPONE is not implemented.~%"))
+  nil
+  (push (vm/find vm (next-token (vm-stream vm))) (vm-compbuf vm)))
 
 (defword (".s" nil nil)
   (let ((pstack (vm-pstack vm)))
