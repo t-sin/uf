@@ -164,7 +164,7 @@
 
 (defun vm/next (vm)
   (let ((ip (vm-ip vm)))
-    (unless (null ip)
+    (unless (or (null (vm-program vm)) (null ip))
       (let ((next (1+ ip)))
         (if (< next (length (vm-program vm)))
             (setf (vm-ip vm) next)
