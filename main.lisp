@@ -228,8 +228,12 @@
 ;; Low level words
 
 (defword ("vm/sem" t nil)
-  (format t "execution semantics!~%")
-  (format t "compilation semantics!~%"))
+  (progn
+    (format t "execution semantics!~%")
+    (vm/next vm))
+  (progn
+    (format t "compilation semantics!~%")
+    (vm/next vm)))
 
 (defword ("vm/next" nil nil)
   (vm/next vm))
@@ -248,37 +252,57 @@
   (vm/unnest vm))
 
 (defword ("vm/create" nil nil)
-  (vm/create vm))
+  (progn
+    (vm/create vm)
+    (vm/next vm)))
 
 (defword ("vm/name" nil nil)
-  (vm/name vm (next-token (vm-stream vm))))
+  (progn
+    (vm/name vm (next-token (vm-stream vm)))
+    (vm/next vm)))
 
 (defword ("vm/find" nil nil)
-  (stack-push (vm/find vm (read-to #\space (vm-stream vm)))
-              (vm-pstack vm)))
+  (progn
+    (stack-push (vm/find vm (read-to #\space (vm-stream vm)))
+                (vm-pstack vm))
+    (vm/next vm)))
 
 (defword ("vm/termcomp" t nil)
-  (vm/terminate-compile vm))
+  (progn
+    (vm/terminate-compile vm)
+    (vm/next vm)))
 
 (defword ("execute" t nil)
-  (execute vm (stack-pop (vm-pstack vm))))
+  (progn
+    (execute vm (stack-pop (vm-pstack vm)))
+    (vm/next vm)))
 
 (defword ("[" t nil)
   nil
-  (vm/interpret vm))
+  (progn
+    (vm/interpret vm)
+    (vm/next vm)))
 
 (defword ("]" t nil)
-  (vm/compile vm))
+  (progn
+    (vm/compile vm)
+    (vm/next vm)))
 
 (defword ("immediate" nil nil)
-  (setf (word-immediate? (vm-dict vm)) t))
+  (progn
+    (setf (word-immediate? (vm-dict vm)) t)
+    (vm/next vm)))
 
 (defword ("postpone" t nil)
   nil
-  (push (vm/find vm (next-token (vm-stream vm))) (vm-compbuf vm)))
+  (progn
+    (push (vm/find vm (next-token (vm-stream vm))) (vm-compbuf vm))
+    (vm/next vm)))
 
 (defword (".s" nil nil)
-  (format t "~a~%" (vm-pstack vm)))
+  (progn
+    (format t "~a~%" (vm-pstack vm))
+    (vm/next vm)))
 
 ;;;;
 ;; runtime
