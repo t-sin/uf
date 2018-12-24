@@ -235,7 +235,9 @@
   (vm/next vm))
 
 (defword ("vm/nest" nil nil)
-  (vm/nest vm (stack-pop (vm-pstack vm))))
+  (let ((w (stack-pop (vm-pstack vm))))
+    (vm/nest vm (word-code w))
+    (vm/next vm)))
 
 (defword ("vm/unnest" nil nil)
   (vm/unnest vm))
