@@ -166,7 +166,7 @@
   (let ((ip (vm-ip vm)))
     (unless (null ip)
       (let ((next (1+ ip)))
-        (if (< ip (length (vm-program vm)))
+        (if (< next (length (vm-program vm)))
             (setf (vm-ip vm) next)
             (vm/unnest vm))))))
 
