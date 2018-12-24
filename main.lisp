@@ -3,7 +3,7 @@
   (:export))
 (in-package #:uf)
 
-(defclass uf/error (simple-error) ())
+(define-condition uf/error (simple-error) ())
 
 ;;;;
 ;; readers
