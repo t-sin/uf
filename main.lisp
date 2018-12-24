@@ -175,16 +175,16 @@
 
 (define-condition uf/empty-program (uf/error) ())
 
-(defun execute (vm word)
+(defun execute (vm word &optional parent-word)
   (format t "; ~a~%" (word-name word))
   (if (word-builtin? word)
-      (funcall (word-builtin-fn word) vm word)
+      (funcall (word-builtin-fn word) vm word parent-word)
       (progn
         (vm/nest vm (word-code word))
         (loop
           :while (< (vm-ip vm) (length (vm-program vm)))
           :for w := (svref (vm-program vm) (vm-ip vm))
-          :do (execute vm w)))))
+          :do (execute vm w word)))))
 
 (defun interpret-1 (vm atom)
   (let ((w (vm/find vm atom)))
@@ -219,8 +219,8 @@
     `(flet ()
        (push (lambda (,$vm)
                (add-builtin-word ,$vm ,name ,immediate? ,data
-                                 (lambda (vm word)
-                                   (declare (ignorable vm word))
+                                 (lambda (vm word parent)
+                                   (declare (ignorable vm word parent))
                                    (if (vm-comp? vm) ,comp-code ,exec-code))))
              uf::*initial-word-list*))))
 
@@ -239,7 +239,7 @@
 
 (defword ("vm/self" nil nil)
   (progn
-    (stack-push word (vm-pstack vm))
+    (stack-push parent (vm-pstack vm))
     (vm/next vm)))
 
 (defword ("vm/nest" nil nil)
