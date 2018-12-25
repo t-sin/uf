@@ -1,9 +1,9 @@
 (defpackage #:uf/vm
-  (:use #:cl)
+  (:use #:cl #:uf/reader)
   (:import-from #:uf/condition
                 #:uf/error)
   (:import-from #:uf/stack
-                #:make-stack
+                #:make-stack*
                 #:stack-pop
                 #:stack-push)
   (:export #:word
@@ -144,7 +144,7 @@
         (loop
           :while (< (vm-ip vm) (length (vm-program vm)))
           :for w := (svref (vm-program vm) (vm-ip vm))
-          :do (execute vm w word)))))
+          :do (vm/execute vm w word)))))
 
 ;;;;
 ;; interpreter
@@ -153,14 +153,14 @@
   (let ((w (vm/find vm atom)))
     (if (null w)
         (error 'uf/undefined-word)
-        (execute vm w))))
+        (vm/execute vm w))))
 
 (defun compile-1 (vm atom)
   (let ((w (vm/find vm atom)))
     (if (null w)
         (error 'uf/undefined-word)
         (if (word-immediate? w)
-            (execute vm w)
+            (vm/execute vm w)
             (push w (vm-compbuf vm))))))
 
 (defun interpret (vm)
