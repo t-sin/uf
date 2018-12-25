@@ -41,9 +41,9 @@
 (defword ("vm/unnest" nil nil)
   (vm/unnest vm))
 
-(defword ("vm/create" nil nil)
+(defword ("vm/word" nil nil)
   (progn
-    (vm/create vm)
+    (vm/word vm)
     (vm/next vm)))
 
 (defword ("vm/name" nil nil)

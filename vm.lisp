@@ -32,7 +32,7 @@
            #:add-word
 
            #:vm/find
-           #:vm/create
+           #:vm/word
            #:vm/name
            #:vm/compile
            #:vm/interpret
@@ -97,7 +97,7 @@
     :do (when (string= (word-name w) name)
           (return-from vm/find w))))
 
-(defun vm/create (vm)
+(defun vm/word (vm)
   (add-word vm :noname nil nil nil nil))
 
 (defun vm/name (vm name)
