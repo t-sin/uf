@@ -3,45 +3,14 @@
   (:import-from #:uf/reader
                 #:next-token
                 #:read-to)
+  (:import-from #:uf/stack
+                #:make-stack
+                #:stack-pop
+                #:stack-push)
   (:export))
 (in-package #:uf)
 
 (define-condition uf/error (simple-error) ())
-
-;;;;
-;; stack
-
-(defstruct stack
-  vec ptr len)
-
-(defmethod print-object ((stack stack) stream)
-  (loop
-    :for n :from 0 :below (stack-ptr stack)
-    :initially (format stream "[")
-    :do (format stream "~s " (svref (stack-vec stack) n))
-    :finally (format stream "]")))
-
-(define-condition uf/stack (uf/error) ())
-(define-condition uf/stack/full (uf/stack) ())
-(define-condition uf/stack/empty (uf/stack) ())
-
-(defun make-stack* (size)
-  (make-stack :vec (coerce (make-array size) 'simple-vector)
-              :ptr 0 :len size))
-
-(defun stack-pop (stack)
-  (if (zerop (stack-ptr stack))
-      (error 'uf/stack/empty :format-arguments "stack is empty!")
-      (progn
-        (decf (stack-ptr stack))
-        (svref (stack-vec stack) (stack-ptr stack)))))
-
-(defun stack-push (cell stack)
-  (if (= (stack-ptr stack) (stack-len stack))
-      (error 'uf/stack/full :format-arguments "stack is full!")
-      (progn
-        (setf (svref (stack-vec stack) (stack-ptr stack)) cell)
-        (incf (stack-ptr stack)))))
 
 ;;;;
 ;; vm
