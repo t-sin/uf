@@ -7,13 +7,13 @@
 
 (defmacro defword ((name immediate? data) exec-code &optional comp-code)
   (let (($vm (gensym "defw/vm")))
-    `(flet ()
-       (push (lambda (,$vm)
-               (add-builtin-word ,$vm ,name ,immediate? ,data
-                                 (lambda (vm word parent)
-                                   (declare (ignorable vm word parent))
-                                   (if (vm-comp? vm) ,comp-code ,exec-code))))
-             uf/builtin:*initial-word-list*))))
+    `(push (lambda (,$vm)
+             (add-builtin-word ,$vm ,name ,immediate? ,data
+                               (lambda (vm word parent)
+                                 (declare (ignorable vm word parent)) ,comp-code)
+                               (lambda (vm word parent)
+                                 (declare (ignorable vm word parent)) ,exec-code)))
+           uf/builtin:*initial-word-list*)))
 
 ;; Low level words
 

@@ -11,8 +11,10 @@
            #:word-name
            #:word-builtin?
            #:word-immediate?
-           #:word-builtin-fn
-           #:word-code
+           #:word-cfn
+           #:word-efn
+           #:word-ccode
+           #:word-ecode
            #:word-data
 
            #:vm
@@ -52,7 +54,7 @@
   type data)
 
 (defstruct word
-  prev name builtin? immediate? builtin-fn code data)
+  prev name builtin? immediate? cfn efn ccode ecode data)
 
 (defmethod print-object ((word word) stream)
   (format stream "~a" (word-name word)))
@@ -69,21 +71,20 @@
            :ip nil
            :comp? nil))
 
-(defun add-builtin-word (vm name immediate? data fn)
+(defun add-builtin-word (vm name immediate? data cfn efn)
   (let ((w (make-word :name name
                       :builtin? t
                       :immediate? immediate?
-                      :builtin-fn fn
+                      :cfn cfn :efn efn
                       :data data)))
     (setf (word-prev w) (vm-dict vm))
     (setf (vm-dict vm) w)))
 
-
-(defun add-word (vm name immediate? data code)
+(defun add-word (vm name immediate? data ccode ecode)
   (let ((w (make-word :name name
                       :builtin? nil
                       :immediate? immediate?
-                      :code code :data data)))
+                      :ccode ccode :ecode ecode :data data)))
     (setf (word-prev w) (vm-dict vm))
     (setf (vm-dict vm) w)))
 
@@ -97,7 +98,7 @@
           (return-from vm/find w))))
 
 (defun vm/create (vm)
-  (add-word vm :noname nil nil nil))
+  (add-word vm :noname nil nil nil nil))
 
 (defun vm/name (vm name)
   (setf (word-name (vm-dict vm)) name))
@@ -109,7 +110,7 @@
   (setf (vm-comp? vm) nil))
 
 (defun vm/terminate-compile (vm)
-  (setf (word-code (vm-dict vm)) (coerce (nreverse (vm-compbuf vm)) 'simple-vector)
+  (setf (word-ecode (vm-dict vm)) (coerce (nreverse (vm-compbuf vm)) 'simple-vector)
         (vm-compbuf vm) nil))
 
 (defun vm/nest (vm program)
@@ -138,9 +139,11 @@
 (defun vm/execute (vm word &optional parent-word)
   (format t "; ~a~%" (word-name word))
   (if (word-builtin? word)
-      (funcall (word-builtin-fn word) vm word parent-word)
+      (if (vm-comp? vm)
+          (funcall (word-cfn word) vm word parent-word)
+          (funcall (word-efn word) vm word parent-word))
       (progn
-        (vm/nest vm (word-code word))
+        (vm/nest vm (word-ecode word))
         (loop
           :while (< (vm-ip vm) (length (vm-program vm)))
           :for w := (svref (vm-program vm) (vm-ip vm))
