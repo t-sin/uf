@@ -29,4 +29,4 @@ Copyright (c) 2018 Shinichi TANAKA (shinichi.tanaka45@gmail.com)
 
 ## License
 
-Rosa is licensed under the Lisp GNU Lesser General Public License.
+*uf* is licensed under the Lisp GNU Lesser General Public License.
