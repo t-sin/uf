@@ -37,7 +37,10 @@
            #:vm/terminate-compile
            #:vm/nest
            #:vm/unnest
-           #:vm/next))
+           #:vm/next
+           #:vm/execute
+
+           #:interpret))
 (in-package #:uf/vm)
 
 (defvar +types+ '(:flag :char :number :xt :addr))
@@ -131,3 +134,40 @@
         (if (< next (length (vm-program vm)))
             (setf (vm-ip vm) next)
             (vm/unnest vm))))))
+
+(defun vm/execute (vm word &optional parent-word)
+  (format t "; ~a~%" (word-name word))
+  (if (word-builtin? word)
+      (funcall (word-builtin-fn word) vm word parent-word)
+      (progn
+        (vm/nest vm (word-code word))
+        (loop
+          :while (< (vm-ip vm) (length (vm-program vm)))
+          :for w := (svref (vm-program vm) (vm-ip vm))
+          :do (execute vm w word)))))
+
+;;;;
+;; interpreter
+
+(defun interpret-1 (vm atom)
+  (let ((w (vm/find vm atom)))
+    (if (null w)
+        (error 'uf/undefined-word)
+        (execute vm w))))
+
+(defun compile-1 (vm atom)
+  (let ((w (vm/find vm atom)))
+    (if (null w)
+        (error 'uf/undefined-word)
+        (if (word-immediate? w)
+            (execute vm w)
+            (push w (vm-compbuf vm))))))
+
+(defun interpret (vm)
+  (loop
+    :for atom := (next-token (vm-stream vm))
+    :until (null atom)
+    :if (vm-comp? vm)
+    :do (compile-1 vm atom)
+    :else
+    :do (interpret-1 vm atom)))

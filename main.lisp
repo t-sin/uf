@@ -40,48 +40,10 @@
                 #:vm/terminate-compile
                 #:vm/nest
                 #:vm/unnest
-                #:vm/next)
+                #:vm/next
+                #:vm/execute)
   (:export))
 (in-package #:uf)
-
-;;;;
-;; interpreter
-
-(define-condition uf/empty-program (uf/error) ())
-
-(defun execute (vm word &optional parent-word)
-  (format t "; ~a~%" (word-name word))
-  (if (word-builtin? word)
-      (funcall (word-builtin-fn word) vm word parent-word)
-      (progn
-        (vm/nest vm (word-code word))
-        (loop
-          :while (< (vm-ip vm) (length (vm-program vm)))
-          :for w := (svref (vm-program vm) (vm-ip vm))
-          :do (execute vm w word)))))
-
-(defun interpret-1 (vm atom)
-  (let ((w (vm/find vm atom)))
-    (if (null w)
-        (error 'uf/undefined-word)
-        (execute vm w))))
-
-(defun compile-1 (vm atom)
-  (let ((w (vm/find vm atom)))
-    (if (null w)
-        (error 'uf/undefined-word)
-        (if (word-immediate? w)
-            (execute vm w)
-            (push w (vm-compbuf vm))))))
-
-(defun interpret (vm)
-  (loop
-    :for atom := (next-token (vm-stream vm))
-    :until (null atom)
-    :if (vm-comp? vm)
-    :do (compile-1 vm atom)
-    :else
-    :do (interpret-1 vm atom)))
 
 ;;;;
 ;; built-in words
@@ -152,7 +114,7 @@
 
 (defword ("execute" t nil)
   (progn
-    (execute vm (stack-pop (vm-pstack vm)))
+    (vm/execute vm (stack-pop (vm-pstack vm)))
     (vm/next vm)))
 
 (defword ("[" t nil)
