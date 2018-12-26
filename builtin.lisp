@@ -85,6 +85,7 @@
     (vm/compile vm)
     (vm/next vm)))
 
+;; this is equal to `vm/word vm/name NAME`...
 (defword ("create" nil nil)
   (let ((name (next-token (vm-stream vm))))
     (setf (word-name (vm/word vm)) name)
