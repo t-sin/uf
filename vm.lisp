@@ -78,7 +78,8 @@
                       :cfn cfn :efn efn
                       :data data)))
     (setf (word-prev w) (vm-dict vm))
-    (setf (vm-dict vm) w)))
+    (setf (vm-dict vm) w)
+    w))
 
 (defun add-word (vm name immediate? data ccode ecode)
   (let ((w (make-word :name name
@@ -86,7 +87,8 @@
                       :immediate? immediate?
                       :ccode ccode :ecode ecode :data data)))
     (setf (word-prev w) (vm-dict vm))
-    (setf (vm-dict vm) w)))
+    (setf (vm-dict vm) w)
+    w))
 
 ;; vm instructions
 
