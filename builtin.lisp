@@ -67,6 +67,8 @@
     (vm/terminate-compile vm)
     (vm/next vm)))
 
+;; VM
+
 (defword ("execute" t nil)
   (progn
     (vm/execute vm (stack-pop (vm-pstack vm)))
@@ -83,6 +85,11 @@
     (vm/compile vm)
     (vm/next vm)))
 
+(defword ("create" nil nil)
+  (let ((name (next-token (vm-stream vm))))
+    (setf (word-name (vm/word vm)) name)
+    (vm/next vm)))
+
 (defword ("immediate" nil nil)
   (progn
     (setf (word-immediate? (vm-dict vm)) t)
@@ -93,6 +100,8 @@
   (progn
     (push (vm/find vm (next-token (vm-stream vm))) (vm-compbuf vm))
     (vm/next vm)))
+
+;; I/O
 
 (defword (".s" nil nil)
   (progn
