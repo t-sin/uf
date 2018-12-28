@@ -5,21 +5,6 @@
 
 (defparameter *initial-word-list* nil)
 
-;; vm/nest use it's initial nest
-(push (lambda (vm)
-        (add-builtin-word vm "vm/nest" nil nil
-                          (lambda (vm word parent)
-                            (declare (ignore parent))
-                            (vm/nest vm (word-program word)))
-                          (lambda (vm word parent)
-                            (declare (ignorable vm word parent)) nil)
-                          (lambda (vm word parent)
-                            (declare (ignorable vm word parent))
-                            (let ((w (stack-pop (vm-pstack vm))))
-                              (vm/nest vm (word-code w))
-                              (vm/next vm)))))
-      *initial-word-list*)
-
 (defmacro defword ((name immediate? data) exec-code &optional comp-code init-code)
   (let (($vm (gensym "defw/vm")))
     `(push (lambda (,$vm)
@@ -33,6 +18,13 @@
            uf/builtin:*initial-word-list*)))
 
 ;; Low level words
+
+(defword ("vm/nest" nil nil)
+  (let ((w (stack-pop (vm-pstack vm))))
+    (vm/nest vm (word-code w))
+    (vm/next vm))
+  nil
+  (vm/nest vm (word-program word)))
 
 (defword ("vm/unnest" nil nil)
   (vm/unnest vm))
