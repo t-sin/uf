@@ -11,8 +11,10 @@
            #:word-name
            #:word-builtin?
            #:word-immediate?
+           #:word-ifn
            #:word-cfn
            #:word-efn
+           #:word-icode
            #:word-ccode
            #:word-ecode
            #:word-data
@@ -54,7 +56,7 @@
   type data)
 
 (defstruct word
-  prev name builtin? immediate? cfn efn ccode ecode data)
+  prev name builtin? immediate? ifn cfn efn icode ccode ecode data)
 
 (defmethod print-object ((word word) stream)
   (format stream "~a" (word-name word)))
@@ -71,21 +73,22 @@
            :ip nil
            :comp? nil))
 
-(defun add-builtin-word (vm name immediate? data cfn efn)
+(defun add-builtin-word (vm name immediate? data ifn cfn efn)
   (let ((w (make-word :name name
                       :builtin? t
                       :immediate? immediate?
-                      :cfn cfn :efn efn
+                      :ifn ifn :cfn cfn :efn efn
                       :data data)))
     (setf (word-prev w) (vm-dict vm))
     (setf (vm-dict vm) w)
     w))
 
-(defun add-word (vm name immediate? data ccode ecode)
+(defun add-word (vm name immediate? data icode ccode ecode)
   (let ((w (make-word :name name
                       :builtin? nil
                       :immediate? immediate?
-                      :ccode ccode :ecode ecode :data data)))
+                      :icode icode :ccode ccode :ecode ecode
+                      :data data)))
     (setf (word-prev w) (vm-dict vm))
     (setf (vm-dict vm) w)
     w))
@@ -98,12 +101,6 @@
     :until (eq w nil)
     :do (when (string= (word-name w) name)
           (return-from vm/find w))))
-
-(defun vm/word (vm)
-  (add-word vm :noname nil nil nil nil))
-
-(defun vm/name (vm name)
-  (setf (word-name (vm-dict vm)) name))
 
 (defun vm/compile (vm)
   (setf (vm-comp? vm) t))
@@ -138,18 +135,33 @@
             (setf (vm-ip vm) next)
             (vm/unnest vm))))))
 
+(flet ((nest (vm word parent)
+         (declare (ignore parent))
+         (vm/nest vm (if (vm-comp? vm)
+                         (word-ecode word)
+                         (word-ecode word)))))
+  (defun vm/word (vm)
+    (let ((w (add-word vm :noname nil nil nil nil nil)))
+      (setf (word-ifn w) #'nest)
+      w)))
+
+(defun vm/name (vm name)
+  (setf (word-name (vm-dict vm)) name))
+
 (defun vm/execute (vm word &optional parent-word)
   (format t "; ~a~%" (word-name word))
+  (let ((ifn (word-ifn word)))
+    (if ifn
+        (funcall ifn vm word parent-word)
+        (vm/execute vm (word-icode word) parent-word)))
   (if (word-builtin? word)
       (if (vm-comp? vm)
           (funcall (word-cfn word) vm word parent-word)
           (funcall (word-efn word) vm word parent-word))
-      (progn
-        (vm/nest vm (word-ecode word))
-        (loop
-          :while (< (vm-ip vm) (length (vm-program vm)))
-          :for w := (svref (vm-program vm) (vm-ip vm))
-          :do (vm/execute vm w word)))))
+      (loop
+        :while (< (vm-ip vm) (length (vm-program vm)))
+        :for w := (svref (vm-program vm) (vm-ip vm))
+        :do (vm/execute vm w word))))
 
 ;;;;
 ;; interpreter

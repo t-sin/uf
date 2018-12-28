@@ -5,10 +5,27 @@
 
 (defparameter *initial-word-list* nil)
 
-(defmacro defword ((name immediate? data) exec-code &optional comp-code)
+;; vm/nest use it's initial nest
+(push (lambda (vm)
+        (add-builtin-word vm "vm/nest" nil nil
+                          (lambda (vm word parent)
+                            (declare (ignore parent))
+                            (vm/nest vm (word-program word)))
+                          (lambda (vm word parent)
+                            (declare (ignorable vm word parent)) nil)
+                          (lambda (vm word parent)
+                            (declare (ignorable vm word parent))
+                            (let ((w (stack-pop (vm-pstack vm))))
+                              (vm/nest vm (word-code w))
+                              (vm/next vm)))))
+      *initial-word-list*)
+
+(defmacro defword ((name immediate? data) exec-code &optional comp-code init-code)
   (let (($vm (gensym "defw/vm")))
     `(push (lambda (,$vm)
              (add-builtin-word ,$vm ,name ,immediate? ,data
+                               (lambda (vm word parent)
+                                 (declare (ignorable vm word parent)) ,init-code)
                                (lambda (vm word parent)
                                  (declare (ignorable vm word parent)) ,comp-code)
                                (lambda (vm word parent)
@@ -16,6 +33,12 @@
            uf/builtin:*initial-word-list*)))
 
 ;; Low level words
+
+(defword ("vm/unnest" nil nil)
+  (vm/unnest vm))
+
+(defword ("vm/next" nil nil)
+  (vm/next vm))
 
 (defword ("vm/sem" t nil)
   (progn
@@ -25,21 +48,10 @@
     (format t "compilation semantics!~%")
     (vm/next vm)))
 
-(defword ("vm/next" nil nil)
-  (vm/next vm))
-
 (defword ("vm/self" nil nil)
   (progn
     (stack-push parent (vm-pstack vm))
     (vm/next vm)))
-
-(defword ("vm/nest" nil nil)
-  (let ((w (stack-pop (vm-pstack vm))))
-    (vm/nest vm (word-code w))
-    (vm/next vm)))
-
-(defword ("vm/unnest" nil nil)
-  (vm/unnest vm))
 
 (defword ("vm/word" nil nil)
   (progn
