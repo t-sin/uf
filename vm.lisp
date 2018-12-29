@@ -6,7 +6,12 @@
                 #:make-stack*
                 #:stack-pop
                 #:stack-push)
-  (:export #:word
+  (:export #:cell
+           #:cell-type
+           #:cell-data
+           #:+types+
+
+           #:word
            #:word-prev
            #:word-name
            #:word-builtin?
@@ -48,7 +53,7 @@
            #:interpret))
 (in-package #:uf/vm)
 
-(defvar +types+ '(:flag :char :number :xt :addr))
+(defvar +types+ '(:nil :flag :char :number :xt :addr))
 (defvar +stack-size+ 1000)
 
 (define-condition  uf/undefined-word (uf/error) ())
@@ -80,7 +85,7 @@
                       :builtin? t
                       :immediate? immediate?
                       :ifn ifn :cfn cfn :efn efn
-                      :data data)))
+                      :data (make-cell :type :nil :data data))))
     (setf (word-prev w) (vm-dict vm))
     (setf (vm-dict vm) w)
     w))
@@ -90,7 +95,7 @@
                       :builtin? nil
                       :immediate? immediate?
                       :icode icode :ccode ccode :ecode ecode
-                      :data data)))
+                      :data (make-cell :type :nil :data data))))
     (setf (word-prev w) (vm-dict vm))
     (setf (vm-dict vm) w)
     w))
