@@ -21,7 +21,7 @@
 
 (defword ("vm/nest" nil nil)
   (let ((w (stack-pop (vm-pstack vm))))
-    (vm/nest vm (word-code w))
+    (vm/nest vm (word-ecode w))
     (vm/next vm))
   nil
   (vm/nest vm (word-program word)))
