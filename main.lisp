@@ -16,8 +16,8 @@
 ;;;;
 ;; runtime
 
-(defun init-vm (stream &optional (word-list *initial-word-list*))
-  (let ((vm (make-vm*)))
+(defun init-vm (stream &optional (debug nil) (word-list *initial-word-list*))
+  (let ((vm (make-vm* debug)))
     (loop
       :for def :in (reverse word-list)
       :do (funcall def vm))

@@ -32,6 +32,7 @@
            #:make-vm*
            #:add-builtin-word
            #:add-word
+           #:print-log
 
            #:vm/find
            #:vm/word
@@ -62,16 +63,17 @@
   (format stream "~a" (word-name word)))
 
 (defstruct vm
-  stream program dict ip comp? compbuf pstack rstack)
+  stream program dict ip comp? compbuf pstack rstack debug)
 
-(defun make-vm* ()
+(defun make-vm* (debug)
   (make-vm :stream nil
            :program nil
            :dict (make-word)
            :pstack (make-stack* +stack-size+)
            :rstack (make-stack* +stack-size+)
            :ip nil
-           :comp? nil))
+           :comp? nil
+           :debug debug))
 
 (defun add-builtin-word (vm name immediate? data ifn cfn efn)
   (let ((w (make-word :name name
@@ -92,6 +94,10 @@
     (setf (word-prev w) (vm-dict vm))
     (setf (vm-dict vm) w)
     w))
+
+(defun print-log (vm fmt &rest args)
+  (when (vm-debug vm)
+    (apply #'format t fmt args)))
 
 ;; vm instructions
 
@@ -149,7 +155,7 @@
   (setf (word-name (vm-dict vm)) name))
 
 (defun vm/execute (vm word &optional parent-word)
-  (format t "; ~a~%" (word-name word))
+  (print-log vm "; ~a~%" (word-name word))
   (let ((ifn (word-ifn word)))
     (if ifn
         (funcall ifn vm word parent-word)
