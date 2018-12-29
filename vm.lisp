@@ -174,6 +174,11 @@
         :for w := (svref (vm-program vm) (vm-ip vm))
         :do (vm/execute vm w word))))
 
+;; TODO: make words cells
+(defun vm/@ (vm cell)
+  (let ((value (cell-data cell)))
+    (stack-push value (vm-pstack vm))))
+
 ;;;;
 ;; interpreter
 
