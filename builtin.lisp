@@ -1,5 +1,5 @@
 (defpackage #:uf/builtin
-  (:use #:cl #:uf/reader #:uf/vm)
+  (:use #:cl #:uf/reader #:uf/stack #:uf/vm)
   (:export #:*initial-word-list*))
 (in-package #:uf/builtin)
 
@@ -94,6 +94,16 @@
   (let ((name (next-token (vm-stream vm))))
     (setf (word-name (vm/word vm)) name)
     (vm/next vm)))
+
+(defword ("does>" t nil)
+  nil
+  (let ((w (vm-dict vm)))
+    (flet ((init-fn (vm word parent)
+             (declare (ignorable vm word parent))
+             (vm/nest vm (word-ecode w))
+             (stack-push (word-data w) (vm-pstack vm))))
+      (setf (vm-compbuf vm) nil
+            (word-ifn w) #'init-fn))))
 
 (defword ("immediate" nil nil)
   (progn
