@@ -6,6 +6,8 @@
                 #:make-stack*
                 #:stack-pop
                 #:stack-push)
+  (:import-from #:uf/number
+                #:to-number)
   (:export #:cell
            #:cell-type
            #:cell-data
@@ -149,7 +151,7 @@
 (flet ((nest (vm word parent)
          (declare (ignore parent))
          (vm/nest vm (if (vm-comp? vm)
-                         (word-ecode word)
+                         (word-ccode word)
                          (word-ecode word)))))
   (defun vm/word (vm)
     (let ((w (add-word vm :noname nil nil nil nil nil)))
@@ -158,6 +160,16 @@
 
 (defun vm/name (vm name)
   (setf (word-name (vm-dict vm)) name))
+
+(defun vm/lit (vm type data)
+  (flet ((exec-fn (vm w p)
+           (declare (ignorable vm w p))
+           (stack-push (word-data w) (vm-pstack vm))))
+    (let ((w (vm/word vm)))
+      (setf (word-data w) (make-cell :type type :data data)
+            (word-builtin? w) t
+            (word-efn w) #'exec-fn)
+      w)))
 
 (defun vm/execute (vm word &optional parent-word)
   (print-log vm "; ~a~%" (word-name word))
@@ -185,13 +197,20 @@
 (defun interpret-1 (vm atom)
   (let ((w (vm/find vm atom)))
     (if (null w)
-        (error 'uf/undefined-word)
+        (let ((n (to-number atom)))
+          (if (null n)
+              (error 'uf/undefined-word)
+              (stack-push (make-cell :type :number :data n)
+                          (vm-pstack vm))))
         (vm/execute vm w))))
 
 (defun compile-1 (vm atom)
   (let ((w (vm/find vm atom)))
     (if (null w)
-        (error 'uf/undefined-word)
+        (let ((n (to-number atom)))
+          (if (null n)
+              (error 'uf/undefined-word)
+              (push (vm/lit vm :number n) (vm-compbuf vm))))
         (if (word-immediate? w)
             (vm/execute vm w)
             (push w (vm-compbuf vm))))))
