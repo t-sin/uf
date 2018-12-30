@@ -179,6 +179,7 @@
   (let ((ifn (word-ifn word)))
     (if ifn
         (funcall ifn vm word parent-word)
+        ;; it's maybe a bug
         (vm/execute vm (word-icode word) parent-word)))
   (if (word-builtin? word)
       (if (vm-comp? vm)
