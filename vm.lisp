@@ -119,13 +119,14 @@
           (return-from vm/find w))))
 
 (defun vm/compile (vm)
+  (stack-push (vm-dict vm) (vm-rstack vm))
   (setf (vm-comp? vm) t))
 
 (defun vm/interpret (vm)
   (setf (vm-comp? vm) nil))
 
 (defun vm/terminate-compile (vm)
-  (setf (word-ecode (vm-dict vm)) (coerce (nreverse (vm-compbuf vm)) 'simple-vector)
+  (setf (word-ecode (stack-pop (vm-rstack vm))) (coerce (nreverse (vm-compbuf vm)) 'simple-vector)
         (vm-compbuf vm) nil))
 
 (defun vm/nest (vm program)
