@@ -63,6 +63,9 @@
 (defstruct cell
   type data)
 
+(defmethod print-object ((cell cell) stream)
+  (format stream "~a:~s" (cell-type cell) (cell-data cell)))
+
 (defstruct word
   prev name builtin? immediate? ifn cfn efn icode ccode ecode data)
 
