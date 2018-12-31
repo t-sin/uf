@@ -155,9 +155,7 @@
 
 (flet ((nest (vm word parent)
          (declare (ignore parent))
-         (vm/nest vm (if (vm-comp? vm)
-                         (word-ccode word)
-                         (word-ecode word)))))
+         (vm/nest vm (word-ecode word))))
   (defun vm/word (vm)
     (let ((w (add-word vm :noname nil nil nil nil nil)))
       (setf (word-ifn w) #'nest)
