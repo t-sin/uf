@@ -7,7 +7,7 @@
                 #:vm-compbuf
                 #:make-vm*
                 #:interpret)
-  (:import-from #:uf/builtin
+  (:import-from #:uf/builtin/main
                 #:*initial-word-list*)
   (:export #:init-vm
            #:interpret))
