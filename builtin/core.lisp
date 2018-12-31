@@ -47,3 +47,7 @@
   (progn
     (push (vm/find vm (next-token (vm-stream vm))) (vm-compbuf vm))
     (vm/next vm)))
+
+(exec "vm/word vm/name create ] postpone vm/word postpone vm/name vm/next [ vm/termcomp")
+(exec "vm/word vm/name : ] vm/word vm/name postpone ] [ vm/termcomp")
+(exec "vm/word vm/name ; ] postpone [ postpone vm/termcomp [ vm/termcomp immediate")
