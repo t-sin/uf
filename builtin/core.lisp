@@ -1,7 +1,8 @@
 (defpackage #:uf/builtin/core
   (:use #:cl #:uf/reader #:uf/stack #:uf/vm)
   (:import-from #:uf/builtin/define
-                #:defword))
+                #:defword
+                #:exec))
 (in-package #:uf/builtin/core)
 
 (defword ("execute" t nil)
