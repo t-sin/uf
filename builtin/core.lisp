@@ -43,5 +43,5 @@
     (vm/next vm)))
 
 (exec "vm/word vm/name create ] postpone vm/word postpone vm/name vm/next [ vm/termcomp")
-(exec "vm/word vm/name : ] vm/word vm/name postpone ] [ vm/termcomp")
-(exec "vm/word vm/name ; ] postpone [ postpone vm/termcomp [ vm/termcomp immediate")
+(exec "vm/word vm/name : ] create postpone ] [ vm/termcomp")
+(exec "vm/word vm/name ; ] postpone [ postpone vm/termcomp vm/next [ vm/termcomp immediate")
