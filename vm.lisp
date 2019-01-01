@@ -32,6 +32,7 @@
            #:vm-dict
            #:vm-ip
            #:vm-comp?
+           #:vm-compiling
            #:vm-compbuf
            #:vm-pstack
            #:vm-rstack
@@ -74,7 +75,7 @@
   (format stream "~a" (word-name word)))
 
 (defstruct vm
-  stream program dict ip comp? compbuf pstack rstack cstack debug)
+  stream program dict ip comp? compiling compbuf pstack rstack cstack debug)
 
 (defun make-vm* (debug)
   (make-vm :stream nil
@@ -121,14 +122,15 @@
           (return-from vm/find w))))
 
 (defun vm/compile (vm)
-  (stack-push (vm-dict vm) (vm-cstack vm))
-  (setf (vm-comp? vm) t))
+  (setf (vm-comp? vm) t
+        (vm-compiling vm) (vm-dict vm)))
 
 (defun vm/interpret (vm)
   (setf (vm-comp? vm) nil))
 
 (defun vm/terminate-compile (vm)
-  (setf (word-ecode (stack-pop (vm-cstack vm))) (coerce (nreverse (vm-compbuf vm)) 'simple-vector)
+  (setf (word-ecode (vm-compiling vm)) (coerce (nreverse (vm-compbuf vm)) 'simple-vector)
+        (vm-compiling vm) nil
         (vm-compbuf vm) nil))
 
 (defun vm/nest (vm program)

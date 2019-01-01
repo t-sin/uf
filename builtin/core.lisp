@@ -45,7 +45,7 @@
 (defword ("recurse" t nil)
   nil
   (progn
-    (push (stack-top (vm-cstack vm)) (vm-compbuf vm))
+    (push (vm-compiling vm) (vm-compbuf vm))
     (vm/next vm)))
 
 (exec "vm/word vm/name create ] postpone vm/word postpone vm/name vm/next [ vm/termcomp")
