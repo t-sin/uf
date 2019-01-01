@@ -147,11 +147,13 @@
 
 (defun vm/next (vm)
   (let ((ip (vm-ip vm)))
-    (unless (or (null (vm-program vm)) (null ip))
+    (unless (null (vm-program vm))
       (let ((next (1+ ip)))
         (if (< next (length (vm-program vm)))
             (setf (vm-ip vm) next)
-            (vm/unnest vm))))))
+            (progn
+              (vm/unnest vm)
+              (incf (vm-ip vm))))))))
 
 (flet ((nest (vm word parent)
          (declare (ignore parent))
