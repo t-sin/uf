@@ -5,6 +5,15 @@
                 #:exec))
 (in-package #:uf/builtin/core)
 
+(defword ("@" nil nil)
+  (let ((cell (stack-pop (vm-pstack vm))))
+    (stack-push (cell-data cell) (vm-pstack vm))))
+
+(defword ("!" nil nil)
+  (let ((cell (stack-pop (vm-pstack vm)))
+        (value (stack-pop (vm-pstack vm))))
+    (setf (cell-data cell) value)))
+
 (defword ("execute" t nil)
   (progn
     (vm/execute vm (stack-pop (vm-pstack vm)))
