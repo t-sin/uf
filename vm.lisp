@@ -165,13 +165,13 @@
   (setf (word-name (vm-dict vm)) name))
 
 (defun vm/lit (vm type data)
-  (flet ((exec-fn (vm w p)
+  (flet ((init-fn (vm w p)
            (declare (ignorable vm w p))
-           (stack-push (word-data w) (vm-pstack vm))))
+           (stack-push (word-data w) (vm-pstack vm))
+           (vm/next vm)))
     (let ((w (vm/word vm)))
       (setf (word-data w) (make-cell :type type :data data)
-            (word-builtin? w) t
-            (word-efn w) #'exec-fn)
+            (word-ifn w) #'init-fn)
       w)))
 
 (defun vm/execute (vm word &optional parent-word)
