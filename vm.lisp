@@ -35,6 +35,7 @@
            #:vm-compbuf
            #:vm-pstack
            #:vm-rstack
+           #:vm-cstack
 
            #:make-vm*
            #:add-builtin-word

@@ -12,6 +12,7 @@
            #:uf/stack/empty
 
            #:make-stack*
+           #:stack-top
            #:stack-pop
            #:stack-push))
 (in-package #:uf/stack)
@@ -33,6 +34,11 @@
 (defun make-stack* (size)
   (make-stack :vec (coerce (make-array size) 'simple-vector)
               :ptr 0 :len size))
+
+(defun stack-top (stack)
+  (if (zerop (stack-ptr stack))
+      (error 'uf/stack/empty :format-arguments "stack is empty!")
+      (svref (stack-vec stack) (1- (stack-ptr stack)))))
 
 (defun stack-pop (stack)
   (if (zerop (stack-ptr stack))
