@@ -10,8 +10,9 @@
                 #:to-number)
   (:export #:cell
            #:cell-type
-           #:cell-data
            #:+types+
+
+           #:num-n
 
            #:word
            #:word-prev
@@ -62,13 +63,13 @@
 
 (define-condition  uf/undefined-word (uf/error) ())
 
-(defstruct cell
-  type data)
+(defstruct cell type)
 
-(defmethod print-object ((cell cell) stream)
-  (format stream "~a:~s" (cell-type cell) (cell-data cell)))
+(defstruct (num (:include cell)) n)
+(defmethod print-object ((num num) stream)
+  (format stream "~a" (num-n num)))
 
-(defstruct word
+(defstruct (word (:include cell))
   prev name builtin? immediate? ifn cfn efn icode ccode ecode data)
 
 (defmethod print-object ((word word) stream)
@@ -93,7 +94,7 @@
                       :builtin? t
                       :immediate? immediate?
                       :ifn ifn :cfn cfn :efn efn
-                      :data (make-cell :type :nil :data data))))
+                      :data (make-cell :type :nil))))
     (setf (word-prev w) (vm-dict vm))
     (setf (vm-dict vm) w)
     w))
@@ -103,7 +104,7 @@
                       :builtin? nil
                       :immediate? immediate?
                       :icode icode :ccode ccode :ecode ecode
-                      :data (make-cell :type :nil :data data))))
+                      :data (make-cell :type :nil))))
     (setf (word-prev w) (vm-dict vm))
     (setf (vm-dict vm) w)
     w))
@@ -175,7 +176,7 @@
            (stack-push (word-data w) (vm-pstack vm))
            (vm/next vm)))
     (let ((w (vm/word vm)))
-      (setf (word-data w) (make-cell :type type :data data)
+      (setf (word-data w) (make-num :type type :n data)
             (word-ifn w) #'init-fn)
       w)))
 
@@ -209,7 +210,7 @@
         (let ((n (to-number atom)))
           (if (null n)
               (error 'uf/undefined-word)
-              (stack-push (make-cell :type :number :data n)
+              (stack-push (make-num :type :number :n n)
                           (vm-pstack vm))))
         (vm/execute vm w))))
 
