@@ -91,6 +91,7 @@
 
 (defun add-builtin-word (vm name immediate? data ifn cfn efn)
   (let ((w (make-word :name name
+                      :type :xt
                       :builtin? t
                       :immediate? immediate?
                       :ifn ifn :cfn cfn :efn efn
@@ -101,6 +102,7 @@
 
 (defun add-word (vm name immediate? data icode ccode ecode)
   (let ((w (make-word :name name
+                      :type :xt
                       :builtin? nil
                       :immediate? immediate?
                       :icode icode :ccode ccode :ecode ecode
