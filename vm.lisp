@@ -12,6 +12,7 @@
            #:cell-type
            #:+types+
 
+           #:make-num
            #:num-n
 
            #:word
