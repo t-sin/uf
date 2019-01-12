@@ -12,6 +12,10 @@
            #:cell-type
            #:+types+
 
+           #:make-pos
+           #:pos-prog
+           #:pos-ip
+
            #:make-num
            #:num-n
 
@@ -59,12 +63,15 @@
            #:interpret))
 (in-package #:uf/vm)
 
-(defvar +types+ '(:nil :flag :char :number :xt :addr))
+(defvar +types+ '(:nil :flag :char :number :xt :pos :addr))
 (defvar +stack-size+ 1000)
 
 (define-condition  uf/undefined-word (uf/error) ())
 
 (defstruct cell type)
+
+(defstruct (pos (:include cell))
+  prog ip)
 
 (defstruct (num (:include cell)) n)
 (defmethod print-object ((num num) stream)
@@ -182,6 +189,13 @@
       (setf (word-data w) (make-num :type type :n data)
             (word-ifn w) #'init-fn)
       w)))
+
+(defun vm/here (vm)
+  (cons (vm-program vm) (vm-ip vm)))
+
+(defun vm/jump (vm pos)
+  (setf (vm-program vm) (car pos)
+        (vm-ip vm) (cdr pos)))
 
 (defun vm/execute (vm word &optional parent-word)
   (print-log vm "; ~a~%" (word-name word))

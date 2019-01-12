@@ -3,6 +3,7 @@
         #:uf/builtin/vm
         #:uf/builtin/core
         #:uf/builtin/stack
+        #:uf/builtin/controll
         #:uf/builtin/math
         #:uf/builtin/io)
   (:import-from #:uf/builtin/define
