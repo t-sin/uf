@@ -24,7 +24,8 @@
   (loop
     :for n :from 0 :below (stack-ptr stack)
     :initially (format stream "[")
-    :do (format stream "~s " (svref (stack-vec stack) n))
+    :do (format stream "~s" (svref (stack-vec stack) n))
+    :do (when (< n (1- (stack-ptr stack))) (format stream " "))
     :finally (format stream "]")))
 
 (define-condition uf/stack (uf/error) ())
