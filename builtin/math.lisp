@@ -13,7 +13,8 @@
       (error "~s is not a number" n1))
     (unless (eq (cell-type n2) :number)
       (error "~s is not a number" n2))
-    (stack-push (make-num :n (+ (num-n n1) (num-n n2))) pstack)))
+    (stack-push (make-num :n (+ (num-n n1) (num-n n2))) pstack)
+    (vm/next vm)))
 
 (defword ("-" nil nil)
   (let* ((pstack (vm-pstack vm))
@@ -23,4 +24,5 @@
       (error "~s is not a number" n1))
     (unless (eq (cell-type n2) :number)
       (error "~s is not a number" n2))
-    (stack-push (make-num :n (- (num-n n1) (num-n n2))) pstack)))
+    (stack-push (make-num :n (- (num-n n1) (num-n n2))) pstack)
+    (vm/next vm)))
