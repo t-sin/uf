@@ -55,3 +55,18 @@
   (progn
     (vm/terminate-compile vm)
     (vm/next vm)))
+
+(defword ("vm/dummy>ctl" t nil)
+  (progn
+    (stack-push :dummy (vm-cstack vm))
+    (vm/next vm)))
+
+(defword ("vm/here>ctl" t nil)
+  (progn
+    (stack-push (make-pos :type :prog (vm-program vm) :ip (vm-ip vm)) (vm-cstack vm))
+    (vm/next vm)))
+
+(defword ("vm/ctl>" t nil)
+  (progn
+    (stack-push (stack-pop (vm-cstack vm)) (vm-pstack vm))
+    (vm/next vm)))
